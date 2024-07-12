@@ -14,7 +14,7 @@ def process_frame_count(counts: pd.DataFrame):
     """
 
     :param counts: pd.DataFrame:
-    :param counts: pd.DataFrame: 
+    :param counts: pd.DataFrame:
 
     """
     processed_counts = pd.DataFrame()
@@ -34,8 +34,8 @@ def process_log_files(log: pd.DataFrame, classNum: int):
 
     :param log: pd.DataFrame:
     :param classNum: int:
-    :param log: pd.DataFrame: 
-    :param classNum: int: 
+    :param log: pd.DataFrame:
+    :param classNum: int:
 
     """
     processed_log = pd.DataFrame()
@@ -62,9 +62,9 @@ def create_dataset(
     :param FPS: param *args:
     :param frame_counts: pd.DataFrame:
     :param processed_counts: pd.DataFrame:
-    :param frame_counts: pd.DataFrame: 
-    :param processed_counts: pd.DataFrame: 
-    :param *args: 
+    :param frame_counts: pd.DataFrame:
+    :param processed_counts: pd.DataFrame:
+    :param *args:
 
     """
     print(len([*args]))
