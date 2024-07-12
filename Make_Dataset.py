@@ -137,8 +137,7 @@ parser.add_argument(
 parser.add_argument(
     "--files",
     type=str,
-    help=
-    "name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
+    help="name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
     default="logNo.txt, logPos.txt, logNeg.txt",
 )
 parser.add_argument("--fps",
