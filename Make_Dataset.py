@@ -11,6 +11,11 @@ columns =  time, name, class, start frame, end frame,
 
 
 def process_frame_count(counts: pd.DataFrame):
+    """
+
+    :param counts: pd.DataFrame: 
+
+    """
     processed_counts = pd.DataFrame()
     processed_counts["time"] = pd.to_datetime(
         counts["Filename"].str.replace(".h264", "").replace(".mp4", ""),
@@ -24,6 +29,12 @@ def process_frame_count(counts: pd.DataFrame):
 
 
 def process_log_files(log: pd.DataFrame, classNum: int):
+    """
+
+    :param log: pd.DataFrame: 
+    :param classNum: int: 
+
+    """
     processed_log = pd.DataFrame()
     processed_log["time"] = pd.to_datetime(log["frame_name"], format="%Y%m%d_%H%M%S")
     processed_log["filename"] = np.nan
@@ -45,8 +56,10 @@ def create_dataset(
 
     :param frame_counts: pd.DataFrame:
     :param processed_counts: pd.DataFrame:
-    :param FPS:
-    :param *args:
+    :param FPS: param *args:
+    :param frame_counts: pd.DataFrame: 
+    :param processed_counts: pd.DataFrame: 
+    :param *args: 
 
     """
     print(len([*args]))
