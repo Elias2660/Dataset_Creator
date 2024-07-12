@@ -3,6 +3,9 @@ import numpy as np
 import os
 import argparse
 
+import numpy as np
+import pandas as pd
+
 """
 the format of the new processed dataframe would be 
 columns =  time, name, class, start frame, end frame, 
@@ -37,7 +40,17 @@ LOG_NO_CLASS_VALUE = 1
 LOG_POS_CLASS_VALUE = 2
 
 
-def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,FPS,  *args):
+def create_dataset(
+    frame_counts: pd.DataFrame, processed_counts: pd.DataFrame, FPS, *args
+):
+    """
+
+    :param frame_counts: pd.DataFrame:
+    :param processed_counts: pd.DataFrame:
+    :param FPS:
+    :param *args:
+
+    """
     print(len([*args]))
     dataset = pd.concat([processed_counts, *args], ignore_index=True)
     dataset = dataset.sort_values(by="time").reset_index(drop=True)
@@ -62,7 +75,8 @@ def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,FP
             )
         elif dataset.loc[i + 1, "start frame"] == 0:
             row_value = frame_counts.loc[
-                frame_counts["Filename"] == dataset.loc[i, "filename"], "Frame count"]
+                frame_counts["Filename"] == dataset.loc[i, "filename"], "Frame count"
+            ]
             dataset.loc[i, "end frame"] = row_value.values[0]
         elif i == 0 and np.isnan(dataset.loc[i, "end frame"]):
             dataset.loc[i, "end frame"] = round(
