@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 import pandas as pd
+
 """
 the format of the new processed dataframe would be
 columns =  time, name, class, start frame, end frame,
@@ -35,8 +36,7 @@ def process_log_files(log: pd.DataFrame, classNum: int):
 
     """
     processed_log = pd.DataFrame()
-    processed_log["time"] = pd.to_datetime(log["frame_name"],
-                                           format="%Y%m%d_%H%M%S")
+    processed_log["time"] = pd.to_datetime(log["frame_name"], format="%Y%m%d_%H%M%S")
     processed_log["filename"] = np.nan
     processed_log["class"] = classNum
     processed_log["start frame"] = np.nan
@@ -49,8 +49,9 @@ LOG_NO_CLASS_VALUE = 1
 LOG_POS_CLASS_VALUE = 2
 
 
-def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,
-                   FPS, *args):
+def create_dataset(
+    frame_counts: pd.DataFrame, processed_counts: pd.DataFrame, FPS, *args
+):
     """
 
     :param frame_counts: pd.DataFrame:
@@ -70,35 +71,35 @@ def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,
     # for frames
     for i in range(len(dataset)):
         if i == len(dataset) - 1:
-            row_value = frame_counts.loc[frame_counts["Filename"] ==
-                                         dataset.loc[i, "filename"],
-                                         "Frame count"]
+            row_value = frame_counts.loc[
+                frame_counts["Filename"] == dataset.loc[i, "filename"], "Frame count"
+            ]
             dataset.loc[i, "end frame"] = row_value.values[0]
             if dataset.loc[i, "start frame"] != 0:
-                dataset.loc[i, "start frame"] = dataset.loc[i - 1,
-                                                            "end frame"] + 1
+                dataset.loc[i, "start frame"] = dataset.loc[i - 1, "end frame"] + 1
         elif np.isnan(dataset.loc[i, "start frame"]) and np.isnan(
-                dataset.loc[i, "end frame"]):
+            dataset.loc[i, "end frame"]
+        ):
             dataset.loc[i, "start frame"] = dataset.loc[i - 1, "end frame"] + 1
-            dataset.loc[i,
-                        "end frame"] = dataset.loc[i, "start frame"] + round(
-                            (dataset.loc[i + 1, "time"] -
-                             dataset.loc[i, "time"]).seconds * FPS)
+            dataset.loc[i, "end frame"] = dataset.loc[i, "start frame"] + round(
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+            )
         elif dataset.loc[i + 1, "start frame"] == 0:
-            row_value = frame_counts.loc[frame_counts["Filename"] ==
-                                         dataset.loc[i, "filename"],
-                                         "Frame count"]
+            row_value = frame_counts.loc[
+                frame_counts["Filename"] == dataset.loc[i, "filename"], "Frame count"
+            ]
             dataset.loc[i, "end frame"] = row_value.values[0]
         elif i == 0 and np.isnan(dataset.loc[i, "end frame"]):
             dataset.loc[i, "end frame"] = round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
-                FPS)
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+            )
 
         elif dataset.loc[i, "start frame"] == 0 and np.isnan(
-                dataset.loc[i, "end frame"]):
+            dataset.loc[i, "end frame"]
+        ):
             dataset.loc[i, "end frame"] = round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
-                FPS)
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+            )
 
         # for classes
         if np.isnan(dataset.loc[i, "class"]) and i == 0:
@@ -140,10 +141,7 @@ parser.add_argument(
     help="name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
     default="logNo.txt, logPos.txt, logNeg.txt",
 )
-parser.add_argument("--fps",
-                    type=int,
-                    help="frames per second, default 25",
-                    default=25)
+parser.add_argument("--fps", type=int, help="frames per second, default 25", default=25)
 
 args = parser.parse_args()
 path = args.path
@@ -155,11 +153,9 @@ counts = pd.read_csv(os.path.join(path, counts_file))
 if "logNo.txt" in files:
     logNo = pd.read_csv(os.path.join(path, "logNo.txt"), names=["frame_name"])
 if "logPos.txt" in files:
-    logPos = pd.read_csv(os.path.join(path, "logPos.txt"),
-                         names=["frame_name"])
+    logPos = pd.read_csv(os.path.join(path, "logPos.txt"), names=["frame_name"])
 if "logNeg.txt" in files:
-    logNeg = pd.read_csv(os.path.join(path, "logNeg.txt"),
-                         names=["frame_name"])
+    logNeg = pd.read_csv(os.path.join(path, "logNeg.txt"), names=["frame_name"])
 
 processed_counts = process_frame_count(counts)
 
