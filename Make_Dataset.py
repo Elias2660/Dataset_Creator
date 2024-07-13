@@ -16,8 +16,12 @@ def process_frame_count(counts: pd.DataFrame):
 
     """
     processed_counts = pd.DataFrame()
+    nc = counts.copy()
+    nc["filename"] = nc["filename"].str.replace(".h264", "", regex=False)
+    nc["filename"] = nc["filename"].str.replace(".mp4", "", regex=False)
+    print(nc)
     processed_counts["time"] = pd.to_datetime(
-        counts["filename"].str.replace(".h264", "").replace(".mp4", ""),
+        nc["filename"],
         format="%Y-%m-%d %H:%M:%S.%f",
     )
     processed_counts["filename"] = counts["filename"]
@@ -182,4 +186,3 @@ if "logNeg.txt" in files:
 dset = create_dataset(counts, processed_counts, fps, *list_of_logs)
 print(dset)
 dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
-# %%
