@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 """
 the format of the new processed dataframe would be
-columns =  time, name, class, start frame, end frame,
+columns =  time, name, class, beginframe, endframe,
 """
 
 
@@ -17,13 +17,13 @@ def process_frame_count(counts: pd.DataFrame):
     """
     processed_counts = pd.DataFrame()
     processed_counts["time"] = pd.to_datetime(
-        counts["Filename"].str.replace(".h264", "").replace(".mp4", ""),
+        counts["filename"].str.replace(".h264", "").replace(".mp4", ""),
         format="%Y-%m-%d %H:%M:%S.%f",
     )
-    processed_counts["filename"] = counts["Filename"]
+    processed_counts["filename"] = counts["filename"]
     processed_counts["class"] = np.nan
-    processed_counts["start frame"] = 0
-    processed_counts["end frame"] = np.nan
+    processed_counts["beginframe"] = 0
+    processed_counts["endframe"] = np.nan
     return processed_counts
 
 
@@ -39,8 +39,8 @@ def process_log_files(log: pd.DataFrame, classNum: int):
                                            format="%Y%m%d_%H%M%S")
     processed_log["filename"] = np.nan
     processed_log["class"] = classNum
-    processed_log["start frame"] = np.nan
-    processed_log["end frame"] = np.nan
+    processed_log["beginframe"] = np.nan
+    processed_log["endframe"] = np.nan
     return processed_log
 
 
@@ -70,33 +70,33 @@ def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,
     # for frames
     for i in range(len(dataset)):
         if i == len(dataset) - 1:
-            row_value = frame_counts.loc[frame_counts["Filename"] ==
+            row_value = frame_counts.loc[frame_counts["filename"] ==
                                          dataset.loc[i, "filename"],
-                                         "Frame count"]
-            dataset.loc[i, "end frame"] = row_value.values[0]
-            if dataset.loc[i, "start frame"] != 0:
-                dataset.loc[i, "start frame"] = dataset.loc[i - 1,
-                                                            "end frame"] + 1
-        elif np.isnan(dataset.loc[i, "start frame"]) and np.isnan(
-                dataset.loc[i, "end frame"]):
-            dataset.loc[i, "start frame"] = dataset.loc[i - 1, "end frame"] + 1
+                                         "framecount"]
+            dataset.loc[i, "endframe"] = row_value.values[0]
+            if dataset.loc[i, "beginframe"] != 0:
+                dataset.loc[i, "beginframe"] = dataset.loc[i - 1,
+                                                            "endframe"] + 1
+        elif np.isnan(dataset.loc[i, "beginframe"]) and np.isnan(
+                dataset.loc[i, "endframe"]):
+            dataset.loc[i, "beginframe"] = dataset.loc[i - 1, "endframe"] + 1
             dataset.loc[i,
-                        "end frame"] = dataset.loc[i, "start frame"] + round(
+                        "endframe"] = dataset.loc[i, "beginframe"] + round(
                             (dataset.loc[i + 1, "time"] -
                              dataset.loc[i, "time"]).seconds * FPS)
-        elif dataset.loc[i + 1, "start frame"] == 0:
-            row_value = frame_counts.loc[frame_counts["Filename"] ==
+        elif dataset.loc[i + 1, "beginframe"] == 0:
+            row_value = frame_counts.loc[frame_counts["filename"] ==
                                          dataset.loc[i, "filename"],
-                                         "Frame count"]
-            dataset.loc[i, "end frame"] = row_value.values[0]
-        elif i == 0 and np.isnan(dataset.loc[i, "end frame"]):
-            dataset.loc[i, "end frame"] = round(
+                                         "framecount"]
+            dataset.loc[i, "endframe"] = row_value.values[0]
+        elif i == 0 and np.isnan(dataset.loc[i, "endframe"]):
+            dataset.loc[i, "endframe"] = round(
                 (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
                 FPS)
 
-        elif dataset.loc[i, "start frame"] == 0 and np.isnan(
-                dataset.loc[i, "end frame"]):
-            dataset.loc[i, "end frame"] = round(
+        elif dataset.loc[i, "beginframe"] == 0 and np.isnan(
+                dataset.loc[i, "endframe"]):
+            dataset.loc[i, "endframe"] = round(
                 (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
                 FPS)
 
@@ -106,11 +106,12 @@ def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,
         elif np.isnan(dataset.loc[i, "class"]):
             dataset.loc[i, "class"] = dataset.loc[i - 1, "class"]
 
-    # for end frames
+    # for endframes
     print(dataset.tail())
     dataset["class"] = dataset["class"].astype(int)
-    dataset["start frame"] = dataset["start frame"].astype(int)
-    dataset["end frame"] = dataset["end frame"].astype(int)
+    dataset["beginframe"] = dataset["beginframe"].astype(int)
+    dataset["endframe"] = dataset["endframe"].astype(int)
+    dataset = dataset.drop(columns=["time"])
     return dataset
 
 
