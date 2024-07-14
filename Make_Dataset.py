@@ -26,7 +26,7 @@ def process_frame_count(counts: pd.DataFrame):
     )
     processed_counts["filename"] = counts["filename"]
     processed_counts["class"] = np.nan
-    processed_counts["beginframe"] = 0
+    processed_counts["beginframe"] = 1
     processed_counts["endframe"] = np.nan
     return processed_counts
 
