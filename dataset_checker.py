@@ -1,20 +1,12 @@
-#%%
 import pandas as pd
 import subprocess
 import re
 import logging
 
-# def check_dataset(dataset):
-#%%
-
-
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
-
-
 logging.info("Finding Dataset files")
 command = "ls dataset_*.csv"
-# command = "ls"
 output = subprocess.run(command, shell=True, capture_output=True, text=True)
 print(output)
 ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
@@ -28,15 +20,15 @@ def check_dataset(path:str):
     faulty_rows = []
     for i in range(len(dataset)):
         if dataset.iloc[i].isnull().values.any():
-            logging.error(f"Found Error Row: {dataset.iloc[i]}")
+            logging.error(f"Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
             logging.error(f"Dataset has missing values at row {i}")
             faulty_rows.append(i)
         elif int(dataset.iloc[i, 2 ]) >= int(dataset.iloc[i, 3]):
-            logging.error(f"Found Error Row: {dataset.iloc[i]}")
+            logging.error(f"Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
             logging.error(f"Dataset has begin frame greater than or equal to end frame at row {i}")
             faulty_rows.append(i)
         elif int(dataset.iloc[i, 2 ]) < 0 or int(dataset.iloc[i, 3]) < 0:
-            logging.error(f"Found Error Row: {dataset.iloc[i]}")
+            logging.error(f"Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
             logging.error(f"Dataset has begin frame or end frame less than or equal to 0 at row {i}")
             faulty_rows.append(i)
     logging.info(f"Found {len(faulty_rows)} faulty rows")
@@ -56,5 +48,3 @@ def check_dataset(path:str):
 
 for file in file_list:
     check_dataset(file)
-
-# %%
