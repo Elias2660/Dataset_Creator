@@ -8,7 +8,6 @@ logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
 logging.info("Finding Dataset files")
 command = "ls dataset_*.csv"
 output = subprocess.run(command, shell=True, capture_output=True, text=True)
-print(output)
 ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 file_list = sorted(
     [ansi_escape.sub("", line) for line in output.stdout.splitlines()]

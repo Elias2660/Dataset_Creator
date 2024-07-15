@@ -19,7 +19,6 @@ def process_frame_count(counts: pd.DataFrame):
     nc = counts.copy()
     nc["filename"] = nc["filename"].str.replace(".h264", "", regex=False)
     nc["filename"] = nc["filename"].str.replace(".mp4", "", regex=False)
-    print(nc)
     processed_counts["time"] = pd.to_datetime(
         nc["filename"],
         format="%Y-%m-%d %H:%M:%S.%f",
@@ -65,7 +64,6 @@ def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,
     :param *args:
 
     """
-    print(len([*args]))
     dataset = pd.concat([processed_counts, *args], ignore_index=True)
     dataset = dataset.sort_values(by="time").reset_index(drop=True)
     # for filenames
@@ -111,7 +109,6 @@ def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,
             dataset.loc[i, "class"] = dataset.loc[i - 1, "class"]
 
     # for endframes
-    print(dataset.tail())
     dataset["class"] = dataset["class"].astype(int)
     dataset["beginframe"] = dataset["beginframe"].astype(int)
     dataset["endframe"] = dataset["endframe"].astype(int)
@@ -184,5 +181,5 @@ if "logNeg.txt" in files:
     list_of_logs.append(processed_logNeg)
 
 dset = create_dataset(counts, processed_counts, fps, *list_of_logs)
-print(dset)
+print(dset.tail())
 dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
