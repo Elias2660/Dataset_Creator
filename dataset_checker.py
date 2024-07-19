@@ -4,10 +4,16 @@ import re
 import logging
 import argparse
 
-def check_dataset(path:str):
+def check_dataset(path:str, counts: pd.DataFrame):
     dataset = pd.read_csv(path)
+
     faulty_rows = []
     for i in range(len(dataset)):
+        if int(dataset.iloc[i, 3]) > counts[dataset.iloc[i, 0] == counts["filename"]]["frame_count"].values[0]:
+            logging.error(f"Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
+            logging.error(f"Dataset has end frame ({dataset.iloc[i, 3]}) greater than total video frames at row {i}, which is {counts[dataset.iloc[i, 0] == counts['filename']]['frame_count'].values[0]}")
+            dataset.iloc[i, 3] = counts[dataset.iloc[i, 0] == counts["filename"]]["frame_count"].values[0]
+        
         if dataset.iloc[i].isnull().values.any():
             logging.error(f"Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
             logging.error(f"Dataset has missing values at row {i}")
@@ -41,6 +47,7 @@ logging.info("Finding Dataset files")
 
 parser = argparse.ArgumentParser(description="Check dataset files for missing values and other errors")
 parser.add_argument("--search-string", type=str, help="search string to find dataset files", default="dataset_*.csv")
+parser.add_arguement("--counts", type=str, help="path to counts file", default="counts.csv")
 
 arguments = parser.parse_args()
 
@@ -51,8 +58,8 @@ file_list = sorted(
     [ansi_escape.sub("", line) for line in output.stdout.splitlines()]
 )
 logging.info(f"found dataset files: {file_list}")
-
+counts = pd.read_csv(arguments.counts)
 for file in file_list:
-    check_dataset(file)
+    check_dataset(file, counts)
     
     
