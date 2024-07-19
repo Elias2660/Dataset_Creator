@@ -47,7 +47,7 @@ logging.info("Finding Dataset files")
 
 parser = argparse.ArgumentParser(description="Check dataset files for missing values and other errors")
 parser.add_argument("--search-string", type=str, help="search string to find dataset files", default="dataset_*.csv")
-parser.add_arguement("--counts", type=str, help="path to counts file", default="counts.csv")
+parser.add_argument("--counts", type=str, help="path to counts file", default="counts.csv")
 
 arguments = parser.parse_args()
 
