@@ -9,10 +9,10 @@ def check_dataset(path:str, counts: pd.DataFrame):
 
     faulty_rows = []
     for i in range(len(dataset)):
-        if int(dataset.iloc[i, 3]) > counts[dataset.iloc[i, 0] == counts["filename"]]["frame_count"].values[0]:
+        if int(dataset.iloc[i, 3]) > counts[dataset.iloc[i, 0] == counts["filename"]]["framecount"].values[0]:
             logging.error(f"Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
-            logging.error(f"Dataset has end frame ({dataset.iloc[i, 3]}) greater than total video frames at row {i}, which is {counts[dataset.iloc[i, 0] == counts['filename']]['frame_count'].values[0]}")
-            dataset.iloc[i, 3] = counts[dataset.iloc[i, 0] == counts["filename"]]["frame_count"].values[0]
+            logging.error(f"Dataset has end frame ({dataset.iloc[i, 3]}) greater than total video frames at row {i}, which is {counts[dataset.iloc[i, 0] == counts['filename']]['framecount'].values[0]}")
+            dataset.iloc[i, 3] = counts[dataset.iloc[i, 0] == counts["filename"]]["framecount"].values[0]
         
         if dataset.iloc[i].isnull().values.any():
             logging.error(f"Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
