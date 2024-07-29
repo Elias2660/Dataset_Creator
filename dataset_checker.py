@@ -50,7 +50,6 @@ parser.add_argument("--search-string", type=str, help="search string to find dat
 parser.add_argument("--counts", type=str, help="path to counts file", default="counts.csv")
 
 arguments = parser.parse_args()
-
 command = f"ls {arguments.search_string}"
 output = subprocess.run(command, shell=True, capture_output=True, text=True)
 ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")

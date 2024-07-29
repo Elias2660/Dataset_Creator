@@ -205,10 +205,5 @@ dset = create_dataset(
 print(dset.tail())
 dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
 # check using dataset_checker.py
-dataset_path = os.path.join(path, "dataset.csv")
-counts_path = os.path.join(path, counts_file)
-dataset_checker_path = os.path.join * (
-    path,
-    "VideoSamplerRewrite",
-    "dataset_checker.py",
-)
+from dataset_checker import check_dataset
+check_dataset(os.path.join(path, "dataset.csv"), counts)
