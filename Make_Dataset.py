@@ -1,15 +1,11 @@
 import argparse
 import os
-
+import subprocess
 import numpy as np
 import pandas as pd
-"""
-the format of the new processed dataframe would be
-columns =  time, name, class, beginframe, endframe,
-"""
 
 
-def process_frame_count(counts: pd.DataFrame):
+def process_frame_count(counts: pd.DataFrame, starting_frame: int) -> pd.DataFrame:
     """
 
     :param counts: pd.DataFrame:
@@ -25,7 +21,7 @@ def process_frame_count(counts: pd.DataFrame):
     )
     processed_counts["filename"] = counts["filename"]
     processed_counts["class"] = np.nan
-    processed_counts["beginframe"] = 1
+    processed_counts["beginframe"] = starting_frame
     processed_counts["endframe"] = np.nan
     return processed_counts
 
@@ -38,8 +34,7 @@ def process_log_files(log: pd.DataFrame, classNum: int):
 
     """
     processed_log = pd.DataFrame()
-    processed_log["time"] = pd.to_datetime(log["frame_name"],
-                                           format="%Y%m%d_%H%M%S")
+    processed_log["time"] = pd.to_datetime(log["frame_name"], format="%Y%m%d_%H%M%S")
     processed_log["filename"] = np.nan
     processed_log["class"] = classNum
     processed_log["beginframe"] = np.nan
@@ -52,10 +47,15 @@ LOG_NO_CLASS_VALUE = 1
 LOG_POS_CLASS_VALUE = 2
 
 
-def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,
-                   FPS, *args):
+def create_dataset(
+    frame_counts: pd.DataFrame,
+    processed_counts: pd.DataFrame,
+    FPS: int,
+    starting_frame: int,
+    frame_interval: int,
+    *args,
+) -> pd.DataFrame:
     """
-
     :param frame_counts: pd.DataFrame:
     :param processed_counts: pd.DataFrame:
     :param FPS: param *args:
@@ -72,35 +72,39 @@ def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,
     # for frames
     for i in range(len(dataset)):
         if i == len(dataset) - 1:
-            row_value = frame_counts.loc[frame_counts["filename"] ==
-                                         dataset.loc[i, "filename"],
-                                         "framecount"]
+            row_value = frame_counts.loc[
+                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
+            ]
             dataset.loc[i, "endframe"] = row_value.values[0]
-            if dataset.loc[i, "beginframe"] != 0:
-                dataset.loc[i, "beginframe"] = dataset.loc[i - 1,
-                                                            "endframe"] + 1
+            if dataset.loc[i, "beginframe"] != starting_frame:
+                dataset.loc[i, "beginframe"] = (
+                    dataset.loc[i - 1, "endframe"] + 1 + frame_interval
+                )
         elif np.isnan(dataset.loc[i, "beginframe"]) and np.isnan(
-                dataset.loc[i, "endframe"]):
-            dataset.loc[i, "beginframe"] = dataset.loc[i - 1, "endframe"] + 1
-            dataset.loc[i,
-                        "endframe"] = dataset.loc[i, "beginframe"] + round(
-                            (dataset.loc[i + 1, "time"] -
-                             dataset.loc[i, "time"]).seconds * FPS)
-        elif dataset.loc[i + 1, "beginframe"] == 1:
-            row_value = frame_counts.loc[frame_counts["filename"] ==
-                                         dataset.loc[i, "filename"],
-                                         "framecount"]
+            dataset.loc[i, "endframe"]
+        ):
+            dataset.loc[i, "beginframe"] = (
+                dataset.loc[i - 1, "endframe"] + 1 + frame_interval
+            )
+            dataset.loc[i, "endframe"] = dataset.loc[i, "beginframe"] + round(
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+            )
+        elif dataset.loc[i + 1, "beginframe"] == starting_frame:
+            row_value = frame_counts.loc[
+                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
+            ]
             dataset.loc[i, "endframe"] = row_value.values[0]
         elif i == 0 and np.isnan(dataset.loc[i, "endframe"]):
             dataset.loc[i, "endframe"] = round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
-                FPS)
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+            )
 
-        elif dataset.loc[i, "beginframe"] == 1 and np.isnan(
-                dataset.loc[i, "endframe"]):
+        elif dataset.loc[i, "beginframe"] == starting_frame and np.isnan(
+            dataset.loc[i, "endframe"]
+        ):
             dataset.loc[i, "endframe"] = round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
-                FPS)
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+            )
 
         # for classes
         if np.isnan(dataset.loc[i, "class"]) and i == 0:
@@ -119,9 +123,19 @@ def create_dataset(frame_counts: pd.DataFrame, processed_counts: pd.DataFrame,
 description = """
 Create Dataset File
 
-This script is used to create a dataset file from the counts.csv, logNo.txt, logPos.txt, and logNeg.txt files.
+This script is used to create a comprehensive dataset file from multiple input files including counts.csv, logNo.txt, logPos.txt, and logNeg.txt. 
+
+The script performs the following steps:
+1. Parses command-line arguments to get the paths and names of the input files, as well as other parameters like frames per second (FPS), starting frame, and frame interval.
+2. Reads the counts file (counts.csv) and log files (logNo.txt, logPos.txt, logNeg.txt) from the specified directory.
+3. Processes the counts file to extract and format relevant information such as filenames and timestamps.
+4. Processes each log file to extract timestamps and assign class labels (e.g., logNo.txt as class 1, logPos.txt as class 2, logNeg.txt as class 0).
+5. Combines the processed counts and log data into a single dataset, ensuring that the data is sorted by time and that missing values are appropriately handled.
+6. Calculates frame ranges for each entry in the dataset based on the provided FPS, starting frame, and frame interval.
+7. Outputs the final dataset to a CSV file named dataset.csv in the specified directory.
+
+This script is useful for preparing data for machine learning models or other analyses that require synchronized and labeled frame data.
 """
-# Load the data
 
 parser = argparse.ArgumentParser(description=description)
 parser.add_argument(
@@ -139,14 +153,16 @@ parser.add_argument(
 parser.add_argument(
     "--files",
     type=str,
-    help=
-    "name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
+    help="name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
     default="logNo.txt, logPos.txt, logNeg.txt",
 )
-parser.add_argument("--fps",
-                    type=int,
-                    help="frames per second, default 25",
-                    default=25)
+parser.add_argument("--fps", type=int, help="frames per second, default 25", default=25)
+parser.add_argument(
+    "--starting-frame", type=int, help="starting frame, default 1", default=1
+)
+parser.add_argument(
+    "--frame-interval", type=int, help="space between frames, default 0", default=0
+)
 
 args = parser.parse_args()
 path = args.path
@@ -158,13 +174,11 @@ counts = pd.read_csv(os.path.join(path, counts_file))
 if "logNo.txt" in files:
     logNo = pd.read_csv(os.path.join(path, "logNo.txt"), names=["frame_name"])
 if "logPos.txt" in files:
-    logPos = pd.read_csv(os.path.join(path, "logPos.txt"),
-                         names=["frame_name"])
+    logPos = pd.read_csv(os.path.join(path, "logPos.txt"), names=["frame_name"])
 if "logNeg.txt" in files:
-    logNeg = pd.read_csv(os.path.join(path, "logNeg.txt"),
-                         names=["frame_name"])
+    logNeg = pd.read_csv(os.path.join(path, "logNeg.txt"), names=["frame_name"])
 
-processed_counts = process_frame_count(counts)
+processed_counts = process_frame_count(counts, args.starting_frame)
 
 list_of_logs = []
 
@@ -180,6 +194,26 @@ if "logNeg.txt" in files:
     processed_logNeg = process_log_files(logNeg, 0)
     list_of_logs.append(processed_logNeg)
 
-dset = create_dataset(counts, processed_counts, fps, *list_of_logs)
+dset = create_dataset(
+    counts,
+    processed_counts,
+    fps,
+    args.starting_frame,
+    args.frame_interval,
+    *list_of_logs,
+)
 print(dset.tail())
 dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
+# check using dataset_checker.py
+dataset_path = os.path.join(path, "dataset.csv")
+counts_path = os.path.join(path, counts_file)
+dataset_checker_path = os.path.join * (
+    path,
+    "VideoSamplerRewrite",
+    "dataset_checker.py",
+)
+
+subprocess.run(
+    f"python '{dataset_checker_path}' --search-string '{dataset_path}' --counts '{counts_path}'",
+    shell=True,
+)
