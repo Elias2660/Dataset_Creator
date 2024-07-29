@@ -212,8 +212,3 @@ dataset_checker_path = os.path.join * (
     "VideoSamplerRewrite",
     "dataset_checker.py",
 )
-
-subprocess.run(
-    f"python '{dataset_checker_path}' --search-string '{dataset_path}' --counts '{counts_path}'",
-    shell=True,
-)
