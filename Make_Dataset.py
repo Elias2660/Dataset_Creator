@@ -143,28 +143,34 @@ parser.add_argument(
     type=str,
     help="path to the directory where the files are located, default .",
     default=".",
+    required=False,
 )
 parser.add_argument(
     "--counts_file",
     type=str,
     help="name of the counts file, default counts.csv",
     default="counts.csv",
+    required=False,
 )
 parser.add_argument(
     "--files",
     type=str,
     help="name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
-    default="logNo.txt, logPos.txt, logNeg.txt",
-)
-parser.add_argument("--fps", type=int, help="frames per second, default 25", default=25)
-parser.add_argument(
-    "--starting-frame", type=int, help="starting frame, default 1", default=1
+    default="logNo.txt,logPos.txt,logNeg.txt",
+    required=False,
 )
 parser.add_argument(
-    "--frame-interval", type=int, help="space between frames, default 0", default=0
+    "--fps", type=int, help="frames per second, default 25", default=25, required=False
+)
+parser.add_argument(
+    "--starting-frame", type=int, help="starting frame, default 1", default=1, required=False
+)
+parser.add_argument(
+    "--frame-interval", type=int, help="space between frames, default 0", default=0, required=False
 )
 
 args = parser.parse_args()
+
 path = args.path
 counts_file = args.counts_file
 files = [file.strip() for file in args.files.split(",")]
@@ -206,4 +212,5 @@ print(dset.tail())
 dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
 # check using dataset_checker.py
 from dataset_checker import check_dataset
+
 check_dataset(os.path.join(path, "dataset.csv"), counts)
