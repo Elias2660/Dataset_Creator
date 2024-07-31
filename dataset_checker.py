@@ -41,24 +41,25 @@ def check_dataset(path:str, counts: pd.DataFrame):
     logging.info(f"Saving cleaned dataset to {path}")
     dataset.to_csv(path, index=False)
 
-format = "%(asctime)s: %(message)s"
-logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
-logging.info("Finding Dataset files")
+if __name__ == "__main__":
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+    logging.info("Finding Dataset files")
 
-parser = argparse.ArgumentParser(description="Check dataset files for missing values and other errors")
-parser.add_argument("--search-string", type=str, help="search string to find dataset files", default="dataset_*.csv")
-parser.add_argument("--counts", type=str, help="path to counts file", default="counts.csv")
+    parser = argparse.ArgumentParser(description="Check dataset files for missing values and other errors")
+    parser.add_argument("--search-string", type=str, help="search string to find dataset files", default="dataset_*.csv")
+    parser.add_argument("--counts", type=str, help="path to counts file", default="counts.csv")
 
-arguments = parser.parse_args()
-command = f"ls {arguments.search_string}"
-output = subprocess.run(command, shell=True, capture_output=True, text=True)
-ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-file_list = sorted(
-    [ansi_escape.sub("", line) for line in output.stdout.splitlines()]
-)
-logging.info(f"found dataset files: {file_list}")
-counts = pd.read_csv(arguments.counts)
-for file in file_list:
-    check_dataset(file, counts)
-    
+    arguments = parser.parse_args()
+    command = f"ls {arguments.search_string}"
+    output = subprocess.run(command, shell=True, capture_output=True, text=True)
+    ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+    file_list = sorted(
+        [ansi_escape.sub("", line) for line in output.stdout.splitlines()]
+    )
+    logging.info(f"found dataset files: {file_list}")
+    counts = pd.read_csv(arguments.counts)
+    for file in file_list:
+        check_dataset(file, counts)
+        
     

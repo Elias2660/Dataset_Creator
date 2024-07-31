@@ -119,7 +119,8 @@ def create_dataset(
     return dataset
 
 
-description = """
+if __name__ == "__main__":
+    description = """
 Create Dataset File
 
 This script is used to create a comprehensive dataset file from multiple input files including counts.csv, logNo.txt, logPos.txt, and logNeg.txt. 
@@ -135,81 +136,80 @@ The script performs the following steps:
 
 This script is useful for preparing data for machine learning models or other analyses that require synchronized and labeled frame data.
 """
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument(
+        "--path",
+        type=str,
+        help="path to the directory where the files are located, default .",
+        default=".",
+        required=False,
+    )
+    parser.add_argument(
+        "--counts_file",
+        type=str,
+        help="name of the counts file, default counts.csv",
+        default="counts.csv",
+        required=False,
+    )
+    parser.add_argument(
+        "--files",
+        type=str,
+        help="name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
+        default="logNo.txt,logPos.txt,logNeg.txt",
+        required=False,
+    )
+    parser.add_argument(
+        "--fps", type=int, help="frames per second, default 25", default=25, required=False
+    )
+    parser.add_argument(
+        "--starting-frame", type=int, help="starting frame, default 1", default=1, required=False
+    )
+    parser.add_argument(
+        "--frame-interval", type=int, help="space between frames, default 0", default=0, required=False
+    )
 
-parser = argparse.ArgumentParser(description=description)
-parser.add_argument(
-    "--path",
-    type=str,
-    help="path to the directory where the files are located, default .",
-    default=".",
-    required=False,
-)
-parser.add_argument(
-    "--counts_file",
-    type=str,
-    help="name of the counts file, default counts.csv",
-    default="counts.csv",
-    required=False,
-)
-parser.add_argument(
-    "--files",
-    type=str,
-    help="name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
-    default="logNo.txt,logPos.txt,logNeg.txt",
-    required=False,
-)
-parser.add_argument(
-    "--fps", type=int, help="frames per second, default 25", default=25, required=False
-)
-parser.add_argument(
-    "--starting-frame", type=int, help="starting frame, default 1", default=1, required=False
-)
-parser.add_argument(
-    "--frame-interval", type=int, help="space between frames, default 0", default=0, required=False
-)
+    args = parser.parse_args()
 
-args = parser.parse_args()
+    path = args.path
+    counts_file = args.counts_file
+    files = [file.strip() for file in args.files.split(",")]
+    fps = args.fps
 
-path = args.path
-counts_file = args.counts_file
-files = [file.strip() for file in args.files.split(",")]
-fps = args.fps
+    counts = pd.read_csv(os.path.join(path, counts_file))
+    if "logNo.txt" in files:
+        logNo = pd.read_csv(os.path.join(path, "logNo.txt"), names=["frame_name"])
+    if "logPos.txt" in files:
+        logPos = pd.read_csv(os.path.join(path, "logPos.txt"), names=["frame_name"])
+    if "logNeg.txt" in files:
+        logNeg = pd.read_csv(os.path.join(path, "logNeg.txt"), names=["frame_name"])
 
-counts = pd.read_csv(os.path.join(path, counts_file))
-if "logNo.txt" in files:
-    logNo = pd.read_csv(os.path.join(path, "logNo.txt"), names=["frame_name"])
-if "logPos.txt" in files:
-    logPos = pd.read_csv(os.path.join(path, "logPos.txt"), names=["frame_name"])
-if "logNeg.txt" in files:
-    logNeg = pd.read_csv(os.path.join(path, "logNeg.txt"), names=["frame_name"])
+    processed_counts = process_frame_count(counts, args.starting_frame)
 
-processed_counts = process_frame_count(counts, args.starting_frame)
+    list_of_logs = []
 
-list_of_logs = []
+    if "logNo.txt" in files:
+        processed_logNo = process_log_files(logNo, 1)
+        list_of_logs.append(processed_logNo)
 
-if "logNo.txt" in files:
-    processed_logNo = process_log_files(logNo, 1)
-    list_of_logs.append(processed_logNo)
+    if "logPos.txt" in files:
+        processed_logPos = process_log_files(logPos, 2)
+        list_of_logs.append(processed_logPos)
 
-if "logPos.txt" in files:
-    processed_logPos = process_log_files(logPos, 2)
-    list_of_logs.append(processed_logPos)
+    if "logNeg.txt" in files:
+        processed_logNeg = process_log_files(logNeg, 0)
+        list_of_logs.append(processed_logNeg)
 
-if "logNeg.txt" in files:
-    processed_logNeg = process_log_files(logNeg, 0)
-    list_of_logs.append(processed_logNeg)
+    dset = create_dataset(
+        counts,
+        processed_counts,
+        fps,
+        args.starting_frame,
+        args.frame_interval,
+        *list_of_logs,
+    )
+    print(dset.tail())
+    dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
+    # check using dataset_checker.py
+    from dataset_checker import check_dataset
 
-dset = create_dataset(
-    counts,
-    processed_counts,
-    fps,
-    args.starting_frame,
-    args.frame_interval,
-    *list_of_logs,
-)
-print(dset.tail())
-dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
-# check using dataset_checker.py
-from dataset_checker import check_dataset
-
-check_dataset(os.path.join(path, "dataset.csv"), counts)
+    check_dataset(os.path.join(path, "dataset.csv"), counts)
