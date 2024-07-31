@@ -167,7 +167,7 @@ parser.add_argument(
 args = parser.parse_args()
 path = args.path
 counts_file = args.counts_file
-files = [file.strip() for file in args.files.split(", ")]
+files = [file.strip() for file in args.files.split(",")]
 fps = args.fps
 
 counts = pd.read_csv(os.path.join(path, counts_file))
