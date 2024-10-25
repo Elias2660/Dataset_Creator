@@ -207,7 +207,6 @@ This script is useful for preparing data for machine learning models or other an
         args.frame_interval,
         *list_of_logs,
     )
-    print(dset.tail())
     dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
     # check using dataset_checker.py
     from dataset_checker import check_dataset
