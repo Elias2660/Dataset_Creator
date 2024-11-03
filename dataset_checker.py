@@ -14,9 +14,9 @@ def check_dataset(path: str, counts: pd.DataFrame):
             int(dataset.iloc[i, 3])
             > counts[dataset.iloc[i, 0] == counts["filename"]]["framecount"].values[0]
         ):
-            logging.error(f"Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
-            logging.error(
-                f"Dataset has end frame ({dataset.iloc[i, 3]}) greater than total video frames at row {i}, which is {counts[dataset.iloc[i, 0] == counts['filename']]['framecount'].values[0]}"
+            logging.info(f"-- Error: Found Error Row: {dataset.iloc[i].to_dict()} --")
+            logging.info(
+                f"Error: Dataset has end frame ({dataset.iloc[i, 3]}) greater than total video frames at row {i}, which is {counts[dataset.iloc[i, 0] == counts['filename']]['framecount'].values[0]}"
             )
             dataset.iloc[i, 3] = counts[dataset.iloc[i, 0] == counts["filename"]][
                 "framecount"
