@@ -100,7 +100,7 @@ if __name__ == "__main__":
         )
         for class_count in range(class_count):
             # find a row with class equal to class count
-            row = final_dataframe[final_dataframe["class"] == class_count][0]
+            row = final_dataframe[final_dataframe["class"] == class_count].iloc[0]
             # remove the row from the final_dataframe
             final_dataframe = final_dataframe.drop(row)
             # add the row to the new dataframe
