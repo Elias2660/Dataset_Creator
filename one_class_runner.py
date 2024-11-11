@@ -23,7 +23,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--start-frame", type=int, help="start frame, default zero", default=0
-        )
+        )f
     parser.add_argument(
         "--end-frame-buffer", type=int, help="the end frame that one would use, default 0", default=0
         )
