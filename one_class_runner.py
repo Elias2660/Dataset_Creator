@@ -99,23 +99,26 @@ if __name__ == "__main__":
             columns=["file", "class", "begin frame", "end frame"]
         )
         for class_count in range(class_count):
-            # find a row with class equal to class count
-            row = final_dataframe[final_dataframe["class"] == class_count].iloc[0]
-            # remove the row from the final_dataframe
-            final_dataframe = final_dataframe.drop(row)
-            # add the row to the new dataframe
+            # find all rows with class equal to class count
+            rows = final_dataframe[final_dataframe["class"] == class_count]
+            # calculate the number of rows to take for this split
+            num_rows = len(rows) // args.splits
+            if i < len(rows) % args.splits:
+                num_rows += 1
+            # take the rows for this split
+            split_rows = rows.iloc[i * num_rows : (i + 1) * num_rows]
+            # remove the rows from the final_dataframe
+            final_dataframe = final_dataframe.drop(split_rows.index)
+            # add the rows to the new dataframe
             dataset_sub = pd.concat(
                 [
-                    final_dataframe,
-                    pd.DataFrame(
-                        [
-                            {
-                                "file": row["filename"],
-                                "class": row["class"],
-                                "begin frame": row["beginframe"],
-                                "end frame": row["endframe"],
-                            }
-                        ]
+                    dataset_sub,
+                    split_rows.rename(
+                        columns={
+                            "filename": "file",
+                            "beginframe": "begin frame",
+                            "endframe": "end frame",
+                        }
                     ),
                 ],
                 ignore_index=True,
