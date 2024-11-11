@@ -35,7 +35,7 @@ if __name__ == "__main__":
     
     for row in counts.iterrows():
         filename = row[1]["filename"]
-        class_name = row[1]["class"]
+        class_name = class_count
         framecount = row[1]["framecount"]
         begin_frame = args.start_frame
         end_frame = row["framecount"] - args.end_frame_buffer
