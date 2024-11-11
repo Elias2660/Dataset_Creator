@@ -38,7 +38,7 @@ if __name__ == "__main__":
         class_name = class_count
         framecount = row[1]["framecount"]
         begin_frame = args.start_frame
-        end_frame = row["framecount"] - args.end_frame_buffer
+        end_frame = row[1]["framecount"] - args.end_frame_buffer
         for i in range(framecount):
             final_dataframe = final_dataframe.append({"filename": filename, "class": class_name, "beginframe": begin_frame, "endframe": end_frame}, ignore_index=True)
             class_count += 1
