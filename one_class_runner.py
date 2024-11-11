@@ -41,7 +41,7 @@ if __name__ == "__main__":
     for row in counts.iterrows():
         frame_interval = (row[1]["framecount"] - args.end_frame_buffer - args.start_frame) // args.splits
         begin_frame = args.start_frame
-        end_frame = row[1]["framecount"] - args.end_frame_buffer
+        end_frame = frame_interval
         for split in range(args.splits):
             final_dataframe = pd.concat([final_dataframe, pd.DataFrame([{"filename": row[1]["filename"], "class": class_count, "beginframe": begin_frame, "endframe": end_frame}])], ignore_index=True)
             begin_frame += frame_interval
