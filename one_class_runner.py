@@ -2,7 +2,7 @@ import pandas as pd
 import logging
 import argparse
 import os
-
+import random
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -46,13 +46,17 @@ if __name__ == "__main__":
     parser.add_argument(
         "--splits",
         type=int,
-        help="number of splits per video, default 4",
-        default=4,
+        help="number of splits per video, default 3",
+        default=3,
         required=False,
     )
     args = parser.parse_args()
     logging.info(
-        f"Arguments: path={args.path}, counts={args.counts}, start_frame={args.start_frame}, end_frame_buffer={args.end_frame_buffer}, splits={args.splits}"
+        f"Arguments: path={args.path},"
+        f" counts={args.counts}, "
+        f" start_frame={args.start_frame}, "
+        f"end_frame_buffer={args.end_frame_buffer}, "
+        f" splits={args.splits}"
     )
 
     counts = pd.read_csv(os.path.join(args.path, args.counts))
@@ -98,29 +102,34 @@ if __name__ == "__main__":
         dataset_sub = pd.DataFrame(
             columns=["file", "class", "begin frame", "end frame"]
         )
-        for class_count in range(class_count):
+        for class_num in range(0, class_count):
             # find all rows with class equal to class count
-            rows = final_dataframe[final_dataframe["class"] == class_count]
-            # calculate the number of rows to take for this split
-            num_rows = len(rows) // args.splits
-            if i < len(rows) % args.splits:
-                num_rows += 1
-            # take the rows for this split
-            split_rows = rows.iloc[i * num_rows : (i + 1) * num_rows]
-            # remove the rows from the final_dataframe
-            final_dataframe = final_dataframe.drop(split_rows.index)
-            # add the rows to the new dataframe
-            dataset_sub = pd.concat(
-                [
-                    dataset_sub,
-                    split_rows.rename(
-                        columns={
-                            "filename": "file",
-                            "beginframe": "begin frame",
-                            "endframe": "end frame",
-                        }
-                    ),
-                ],
-                ignore_index=True,
-            )
+            class_rows = final_dataframe[final_dataframe["class"] == class_num]
+            if not class_rows.empty:
+                row_num = class_rows.index[0]
+                if len(class_rows) > 1:
+                    row_num = random.choice(class_rows.index.tolist())
+
+                row = class_rows.loc[[row_num]]
+
+                # remove the rows from the final_dataframe
+                final_dataframe = final_dataframe.drop(row_num)
+                final_dataframe = final_dataframe.reset_index(drop=True)
+                # add the rows to the new dataframe
+
+                dataset_sub = pd.concat(
+                    [
+                        dataset_sub,
+                        row.rename(
+                            columns={
+                                "filename": "file",
+                                "beginframe": "begin frame",
+                                "endframe": "end frame",
+                            }
+                        ),
+                    ],
+                    ignore_index=True,
+                )
+
         dataset_sub.to_csv(os.path.join(args.path, f"dataset_{i}.csv"), index=False)
+        logging.info(f"dataset_{i}.csv created")
