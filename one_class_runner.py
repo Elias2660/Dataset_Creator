@@ -27,6 +27,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--end-frame-buffer", type=int, help="the end frame that one would use, default 0", default=0
         )
+    parser.add_argument(
+        "--splits", type=int, help="number of splits per video, default 4", default=4
+    )
     args = parser.parse_args()
     counts = pd.read_csv(os.path.join(args.path, args.counts))
     
@@ -34,14 +37,14 @@ if __name__ == "__main__":
     class_count = 0
     
     for row in counts.iterrows():
-        filename = row[1]["filename"]
-        class_name = class_count
-        framecount = row[1]["framecount"]
+        frame_interval = (row[1]["framecount"] - args.end_frame_buffer - args.start_frame) // args.splits
         begin_frame = args.start_frame
         end_frame = row[1]["framecount"] - args.end_frame_buffer
-        
-        new_row = pd.DataFrame([{"filename": filename, "class": class_name, "beginframe": begin_frame, "endframe": end_frame}])
-        final_dataframe = pd.concat([final_dataframe, new_row], ignore_index=True)
+        for split in range(args.splits):
+            final_dataframe = pd.concat([final_dataframe, pd.DataFrame([{"filename": row[1]["filename"], "class": class_count, "beginframe": begin_frame, "endframe": end_frame}])], ignore_index=True)
+            begin_frame += frame_interval
+            end_frame += frame_interval
+
         class_count += 1
     
     final_dataframe.to_csv(os.path.join(args.path, "dataset.csv"), index=False)
