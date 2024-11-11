@@ -40,7 +40,8 @@ if __name__ == "__main__":
         begin_frame = args.start_frame
         end_frame = row[1]["framecount"] - args.end_frame_buffer
         for i in range(framecount):
-            final_dataframe = final_dataframe.append({"filename": filename, "class": class_name, "beginframe": begin_frame, "endframe": end_frame}, ignore_index=True)
+            new_row = pd.DataFrame([{"filename": filename, "class": class_name, "beginframe": begin_frame, "endframe": end_frame}])
+            final_dataframe = pd.concat([final_dataframe, new_row], ignore_index=True)
             class_count += 1
     
     final_dataframe.to_csv(os.path.join(args.path, "dataset.csv"), index=False)
