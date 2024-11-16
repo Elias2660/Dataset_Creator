@@ -2,6 +2,7 @@ import argparse
 import os
 import numpy as np
 import pandas as pd
+import utils
 
 
 def process_frame_count(counts: pd.DataFrame, starting_frame: int) -> pd.DataFrame:
@@ -159,13 +160,25 @@ This script is useful for preparing data for machine learning models or other an
         required=False,
     )
     parser.add_argument(
-        "--fps", type=int, help="frames per second, default 25", default=25, required=False
+        "--fps",
+        type=int,
+        help="frames per second, default 25. If mp4, it will be automatically detected",
+        default=25,
+        required=False,
     )
     parser.add_argument(
-        "--starting-frame", type=int, help="starting frame, default 1", default=1, required=False
+        "--starting-frame",
+        type=int,
+        help="starting frame, default 1",
+        default=1,
+        required=False,
     )
     parser.add_argument(
-        "--frame-interval", type=int, help="space between frames, default 0", default=0, required=False
+        "--frame-interval",
+        type=int,
+        help="space between frames, default 0",
+        default=0,
+        required=False,
     )
 
     args = parser.parse_args()
@@ -173,7 +186,13 @@ This script is useful for preparing data for machine learning models or other an
     path = args.path
     counts_file = args.counts_file
     files = [file.strip() for file in args.files.split(",")]
-    fps = args.fps
+    video_files = [
+        file for file in files if file.endswith(".mp4") or file.endswith(".h264")
+    ]
+    if video_files[0].endswith(".mp4"):
+        fps = utils.get_video_info(files, path)
+    elif video_files[0].endswith(".h264"):
+        fps = 25
 
     counts = pd.read_csv(os.path.join(path, counts_file))
     if "logNo.txt" in files:
