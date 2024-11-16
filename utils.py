@@ -8,5 +8,6 @@ def get_video_info(file_list, path):
     video = cv2.VideoCapture(os.path.join(path, file_list[0]))
     fps = video.get(cv2.CAP_PROP_FPS)
     video.release()
+    return fps
     
     
