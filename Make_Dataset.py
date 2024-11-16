@@ -186,8 +186,9 @@ This script is useful for preparing data for machine learning models or other an
     path = args.path
     counts_file = args.counts_file
     files = [file.strip() for file in args.files.split(",")]
+    dir_files = os.listdir(path)
     video_files = [
-        file for file in files if file.endswith(".mp4") or file.endswith(".h264")
+        file for file in dir_files if file.endswith(".mp4") or file.endswith(".h264")
     ]
     if video_files[0].endswith(".mp4"):
         fps = utils.get_video_info(files, path)
