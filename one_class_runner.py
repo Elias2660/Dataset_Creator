@@ -1,3 +1,57 @@
+"""
+one_class_runner.py
+
+This script processes a counts CSV file containing video information and generates dataset CSV files by partitioning
+each video's frame count into several splits. Each video is treated as a distinct class, and for each class,
+the script creates frame intervals and produces multiple dataset files with one frame interval per class per file.
+
+Usage:
+    Run the script from the command line in the following format:
+        python one_class_runner.py [--path PATH] [--counts COUNTS_CSV]
+                                    [--start-frame START_FRAME] [--end-frame-buffer END_FRAME_BUFFER]
+                                    [--splits SPLITS]
+
+Arguments:
+    --path:
+        Path to the directory containing the counts CSV file.
+        (Default: ".")
+    
+    --counts:
+        Filename for the counts CSV file, expected to have columns including at least 'filename' and 'framecount'.
+        (Default: "counts.csv")
+    
+    --start-frame:
+        The starting frame number to consider when splitting frames.
+        (Default: 0)
+    
+    --end-frame-buffer:
+        Number of frames to reserve at the end, effectively reducing the total frames considered.
+        (Default: 0)
+    
+    --splits:
+        Number of splits (or segments) per video. The script divides each video's usable frames into this many segments.
+        (Default: 3)
+
+Workflow:
+    1. Initialize logging and parse command line arguments.
+    2. Read the counts CSV file located in the specified directory.
+    3. For each video file (treated as a unique class), compute frame intervals by subtracting buffers and dividing
+       by the number of splits.
+    4. Create a master dataset CSV file ("dataset.csv") that records all frame ranges, filenames, and associated class labels.
+    5. For each split:
+         - Randomly select one interval per class.
+         - Remove the chosen interval from the master dataset to avoid duplication.
+         - Write the selected intervals to a new CSV file (e.g., "dataset_0.csv", "dataset_1.csv", etc.).
+    6. Log key processing steps and output file creation progress.
+
+Dependencies:
+    - pandas: For reading and manipulating CSV data.
+    - logging: For logging information throughout the processing.
+    - argparse: For handling command line argument parsing.
+    - os: For file path operations.
+    - random: For random selection of intervals during dataset file creation.
+"""
+
 import pandas as pd
 import logging
 import argparse
@@ -10,7 +64,6 @@ if __name__ == "__main__":
         level=logging.INFO,
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    logging.info("Finding Dataset files")
 
     parser = argparse.ArgumentParser(
         description="Special case for dataprep videos where each video is one different class"
@@ -25,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--counts",
         type=str,
-        help="path to counts file, default is counts.csv",
+        help="name of counts file, default is counts.csv",
         default="counts.csv",
         required=False,
     )
@@ -51,6 +104,10 @@ if __name__ == "__main__":
         required=False,
     )
     args = parser.parse_args()
+
+    logging.info("Running the Dataset_Creator/one_class_runner.py script")
+    logging.info("Finding Dataset files")
+
     logging.info(
         f"Arguments: path={args.path},"
         f" counts={args.counts}, "

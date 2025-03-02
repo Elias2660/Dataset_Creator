@@ -1,8 +1,25 @@
+"""
+Dataset Creator
+
+This module creates a comprehensive dataset file by merging video frame counts with log files that annotate specific events in the video data. It processes an input counts CSV containing video file names (from which timestamps are extracted) and several log files (such as logNo.txt, logPos.txt, and logNeg.txt) that denote different event classes. The script performs the following steps:
+
+1. Parses command-line arguments to determine the input file paths, frame rate (FPS), starting frame number, and the interval between frame sequences.
+2. Reads the counts CSV to extract timestamp information from video filenames (supporting both .mp4 and .h264 formats).
+3. Reads and processes each specified log file, converting timestamps and assigning a predefined class value for each log (e.g., no event, positive event, negative event).
+4. Merges the processed counts and log data, sorts the entries by time, and fills forward missing filename values.
+5. Computes frame ranges (begin and end frames) based on the FPS, starting frame, and frame interval. The logic ensures contiguous frame numbering per video and handles the transition between different events.
+6. Outputs the final, processed dataset as a CSV file named "dataset.csv".
+7. Optionally verifies the dataset using an external checker module.
+
+This module is particularly useful for preparing labeled frame data for machine learning applications or video analysis by aligning temporal metadata with event annotations.
+"""
+
 import argparse
 import os
 import numpy as np
 import pandas as pd
 import utils
+import logging
 
 
 def process_frame_count(counts: pd.DataFrame, starting_frame: int) -> pd.DataFrame:
@@ -121,6 +138,13 @@ def create_dataset(
 
 
 if __name__ == "__main__":
+        
+    logging.basicConfig(
+        format="%(asctime)s: %(message)s",
+        level=logging.INFO,
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    logging.info("Running the Dataset_Creator/Make_Dataset.py script")
     description = """
 Create Dataset File
 
@@ -196,6 +220,7 @@ This script is useful for preparing data for machine learning models or other an
         fps = 25
 
     counts = pd.read_csv(os.path.join(path, counts_file))
+    
     if "logNo.txt" in files:
         logNo = pd.read_csv(os.path.join(path, "logNo.txt"), names=["frame_name"])
     if "logPos.txt" in files:
