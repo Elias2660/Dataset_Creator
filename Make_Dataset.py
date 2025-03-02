@@ -1,19 +1,63 @@
 """
-Dataset Creator
+Make_Dataset.py
 
-This module creates a comprehensive dataset file by merging video frame counts with log files that annotate specific events in the video data. It processes an input counts CSV containing video file names (from which timestamps are extracted) and several log files (such as logNo.txt, logPos.txt, and logNeg.txt) that denote different event classes. The script performs the following steps:
+Description:
+    This script creates a comprehensive dataset CSV file ("dataset.csv") by combining frame count data from "counts.csv"
+    with log file data (logNo.txt, logPos.txt, logNeg.txt). It processes the frame counts by converting video filenames into
+    timestamps and then merges these with the log files that assign class labels. The final CSV aggregates each video's filename,
+    class label, beginning frame, and ending frame based on calculated frame intervals determined by the provided FPS,
+    starting frame, and frame interval parameters.
 
-1. Parses command-line arguments to determine the input file paths, frame rate (FPS), starting frame number, and the interval between frame sequences.
-2. Reads the counts CSV to extract timestamp information from video filenames (supporting both .mp4 and .h264 formats).
-3. Reads and processes each specified log file, converting timestamps and assigning a predefined class value for each log (e.g., no event, positive event, negative event).
-4. Merges the processed counts and log data, sorts the entries by time, and fills forward missing filename values.
-5. Computes frame ranges (begin and end frames) based on the FPS, starting frame, and frame interval. The logic ensures contiguous frame numbering per video and handles the transition between different events.
-6. Outputs the final, processed dataset as a CSV file named "dataset.csv".
-7. Optionally verifies the dataset using an external checker module.
+Usage:
+    Run the script from the command line as follows:
+        python Make_Dataset.py [--path PATH] [--counts_file COUNTS_CSV] [--files LOG_FILES]
+                               [--fps FPS] [--starting-frame START_FRAME] [--frame-interval FRAME_INTERVAL]
 
-This module is particularly useful for preparing labeled frame data for machine learning applications or video analysis by aligning temporal metadata with event annotations.
+Arguments:
+    --path:
+        Directory path where the input files are located.
+        (Default: ".")
+    
+    --counts_file:
+        Filename of the counts CSV file containing 'filename' and 'framecount' columns.
+        (Default: "counts.csv")
+    
+    --files:
+        Comma-separated list of log file names to process (e.g., "logNo.txt,logPos.txt,logNeg.txt").
+        (Default: "logNo.txt,logPos.txt,logNeg.txt")
+    
+    --fps:
+        Frames per second used in the video. Defaults to 25 or is auto-detected based on the video file type.
+        (Default: 25)
+    
+    --starting-frame:
+        Starting frame number used as the basis for computing frame intervals.
+        (Default: 1)
+    
+    --frame-interval:
+        Number of frames to add as an interval between segments.
+        (Default: 0)
+
+Workflow:
+    1. Sets up logging and parses command-line arguments.
+    2. Reads the "counts.csv" file and the provided log files from the specified directory.
+    3. Processes the counts file by converting video filenames to timestamps and initializing frame parameters.
+    4. Processes each log file to extract timestamps and assign corresponding class labels.
+    5. Merges the processed counts and log data, filling missing filenames and sorting entries by time.
+    6. Calculates the beginning and ending frames for each dataset entry based on the FPS, starting frame, and frame interval.
+    7. Outputs the final dataset to "dataset.csv" and verifies its integrity using an external checker.
+
+Dependencies:
+    - pandas: For CSV manipulation and data processing.
+    - numpy: For numerical operations and handling missing values.
+    - argparse: For parsing command-line arguments.
+    - logging: For logging key steps during script execution.
+    - os: For handling file system operations.
+    - utils: For additional utility functions such as fetching video metadata.
+
+Returns:
+    A CSV file ("dataset.csv") that aggregates each video's filename, class label, beginning frame, and ending frame.
 """
-
 import argparse
 import os
 import numpy as np
