@@ -260,6 +260,13 @@ if __name__ == "__main__":
         default=0,
         required=False,
     )
+    parser.add_argument(
+        "--end-frame-buffer",
+        type=int, 
+        help="the buffer for each dataset.csv end frame",
+        default=0,
+        required=False
+    )
 
     args = parser.parse_args()
     logging.info("Running the Dataset_Creator/Make_Dataset.py script")
@@ -299,6 +306,10 @@ if __name__ == "__main__":
         args.frame_interval,
         *list_of_logs,
     )
+    
+    for dset_idx in range(len(dset.index)):
+        dset.loc[dset_idx].endframe -= args.end_frame_buffer
+    
     dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
     # check using dataset_checker.py
     from dataset_checker import check_dataset
