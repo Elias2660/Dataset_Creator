@@ -1,6 +1,9 @@
 *.csv 
 
 log*.txt
+*.mp4 
+*.h264
+dataset*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

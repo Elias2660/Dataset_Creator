@@ -58,6 +58,7 @@ Dependencies:
 Returns:
     A CSV file ("dataset.csv") that aggregates each video's filename, class label, beginning frame, and ending frame.
 """
+
 import argparse
 import os
 import numpy as np
@@ -102,12 +103,6 @@ def process_log_files(log: pd.DataFrame, classNum: int):
     processed_log["endframe"] = np.nan
     return processed_log
 
-
-LOG_NEG_CLASS_VALUE = 0
-LOG_NO_CLASS_VALUE = 1
-LOG_POS_CLASS_VALUE = 2
-
-
 def create_dataset(
     frame_counts: pd.DataFrame,
     processed_counts: pd.DataFrame,
@@ -131,8 +126,14 @@ def create_dataset(
     dataset["filename"] = dataset["filename"].ffill()
     dataset = dataset.dropna(subset=["filename"]).reset_index(drop=True)
     # for frames
+    
+    # let's seperate into video rows and change rows.
+    # IMPORTANT this method, especially if you have a begin-frame greater than zero
+    # can cause the begin frame to be higher than the end frame. This will get rooted
+    # out in the dataset checker
     for i in range(len(dataset)):
         if i == len(dataset) - 1:
+            # if it's the last row, then do something special 
             row_value = frame_counts.loc[
                 frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
             ]
@@ -143,7 +144,10 @@ def create_dataset(
                 )
         elif np.isnan(dataset.loc[i, "beginframe"]) and np.isnan(
             dataset.loc[i, "endframe"]
-        ):
+        ): 
+            # if it's a switch (e.g. a time object between logNo, logPos, and logNeg)
+            # then the end and begin frame are counted on the time diffece between the
+            # next rows
             dataset.loc[i, "beginframe"] = (
                 dataset.loc[i - 1, "endframe"] + 1 + frame_interval
             )
@@ -151,11 +155,16 @@ def create_dataset(
                 (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
             )
         elif dataset.loc[i + 1, "beginframe"] == starting_frame:
+            # if it's the video (sourced from the counts.csv), setting the end frame
+            # and the row value
             row_value = frame_counts.loc[
                 frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
             ]
             dataset.loc[i, "endframe"] = row_value.values[0]
         elif i == 0 and np.isnan(dataset.loc[i, "endframe"]):
+            # it's the first frame row and there's no end frame (e.g. it's a video object)
+            # the then end frame would be the next row times the fps (this is separate from 
+            # the next elif because of the issues of being first)
             dataset.loc[i, "endframe"] = round(
                 (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
             )
@@ -163,14 +172,18 @@ def create_dataset(
         elif dataset.loc[i, "beginframe"] == starting_frame and np.isnan(
             dataset.loc[i, "endframe"]
         ):
+            # if it's the starting row, the end frame is the times to the next 
+            # row times the fps
             dataset.loc[i, "endframe"] = round(
                 (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
             )
 
         # for classes
         if np.isnan(dataset.loc[i, "class"]) and i == 0:
-            dataset.loc[i, "class"] = LOG_NO_CLASS_VALUE
+            # automatically set the first one to class zero if it's first (wired fluke but possible)
+            dataset.loc[i, "class"] = 0
         elif np.isnan(dataset.loc[i, "class"]):
+            # else just seit it to the class above it
             dataset.loc[i, "class"] = dataset.loc[i - 1, "class"]
 
     # for endframes
@@ -182,29 +195,28 @@ def create_dataset(
 
 
 if __name__ == "__main__":
-        
+
     logging.basicConfig(
         format="%(asctime)s: %(message)s",
         level=logging.INFO,
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    logging.info("Running the Dataset_Creator/Make_Dataset.py script")
     description = """
-Create Dataset File
+    Create Dataset File
 
-This script is used to create a comprehensive dataset file from multiple input files including counts.csv, logNo.txt, logPos.txt, and logNeg.txt. 
+    This script is used to create a comprehensive dataset file from multiple input files including counts.csv, logNo.txt, logPos.txt, and logNeg.txt. 
 
-The script performs the following steps:
-1. Parses command-line arguments to get the paths and names of the input files, as well as other parameters like frames per second (FPS), starting frame, and frame interval.
-2. Reads the counts file (counts.csv) and log files (logNo.txt, logPos.txt, logNeg.txt) from the specified directory.
-3. Processes the counts file to extract and format relevant information such as filenames and timestamps.
-4. Processes each log file to extract timestamps and assign class labels (e.g., logNo.txt as class 1, logPos.txt as class 2, logNeg.txt as class 0).
-5. Combines the processed counts and log data into a single dataset, ensuring that the data is sorted by time and that missing values are appropriately handled.
-6. Calculates frame ranges for each entry in the dataset based on the provided FPS, starting frame, and frame interval.
-7. Outputs the final dataset to a CSV file named dataset.csv in the specified directory.
+    The script performs the following steps:
+    1. Parses command-line arguments to get the paths and names of the input files, as well as other parameters like frames per second (FPS), starting frame, and frame interval.
+    2. Reads the counts file (counts.csv) and log files (logNo.txt, logPos.txt, logNeg.txt) from the specified directory.
+    3. Processes the counts file to extract and format relevant information such as filenames and timestamps.
+    4. Processes each log file to extract timestamps and assign class labels (e.g., logNo.txt as class 1, logPos.txt as class 2, logNeg.txt as class 0).
+    5. Combines the processed counts and log data into a single dataset, ensuring that the data is sorted by time and that missing values are appropriately handled.
+    6. Calculates frame ranges for each entry in the dataset based on the provided FPS, starting frame, and frame interval.
+    7. Outputs the final dataset to a CSV file named dataset.csv in the specified directory.
 
-This script is useful for preparing data for machine learning models or other analyses that require synchronized and labeled frame data.
-"""
+    This script is useful for preparing data for machine learning models or other analyses that require synchronized and labeled frame data.
+    """
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "--path",
@@ -250,7 +262,7 @@ This script is useful for preparing data for machine learning models or other an
     )
 
     args = parser.parse_args()
-
+    logging.info("Running the Dataset_Creator/Make_Dataset.py script")
     path = args.path
     counts_file = args.counts_file
     files = [file.strip() for file in args.files.split(",")]
@@ -258,35 +270,26 @@ This script is useful for preparing data for machine learning models or other an
     video_files = [
         file for file in dir_files if file.endswith(".mp4") or file.endswith(".h264")
     ]
+    
     if video_files[0].endswith(".mp4"):
         fps = utils.get_video_info(files, path)
     elif video_files[0].endswith(".h264"):
+        # this is because finding the frames per second of a .h264 file is a pain in the ass
         fps = 25
 
     counts = pd.read_csv(os.path.join(path, counts_file))
-    
-    if "logNo.txt" in files:
-        logNo = pd.read_csv(os.path.join(path, "logNo.txt"), names=["frame_name"])
-    if "logPos.txt" in files:
-        logPos = pd.read_csv(os.path.join(path, "logPos.txt"), names=["frame_name"])
-    if "logNeg.txt" in files:
-        logNeg = pd.read_csv(os.path.join(path, "logNeg.txt"), names=["frame_name"])
-
     processed_counts = process_frame_count(counts, args.starting_frame)
-
     list_of_logs = []
+    
+    class_idx = 0
+    for file in files:
+        logging.info(f"Assigning class number {class_idx} to class {(file.split('.')[0][3:]).upper()}")
+        logFile = pd.read_csv(os.path.join(path, file), names=["frame_name"])
+        processed_logfile = process_log_files(logFile, class_idx)
+        list_of_logs.append(processed_logfile)
 
-    if "logNo.txt" in files:
-        processed_logNo = process_log_files(logNo, 1)
-        list_of_logs.append(processed_logNo)
-
-    if "logPos.txt" in files:
-        processed_logPos = process_log_files(logPos, 2)
-        list_of_logs.append(processed_logPos)
-
-    if "logNeg.txt" in files:
-        processed_logNeg = process_log_files(logNeg, 0)
-        list_of_logs.append(processed_logNeg)
+        
+        class_idx += 1
 
     dset = create_dataset(
         counts,
