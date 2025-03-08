@@ -17,23 +17,23 @@ Arguments:
     --path:
         Directory path where the input files are located.
         (Default: ".")
-    
+
     --counts_file:
         Filename of the counts CSV file containing 'filename' and 'framecount' columns.
         (Default: "counts.csv")
-    
+
     --files:
         Comma-separated list of log file names to process (e.g., "logNo.txt,logPos.txt,logNeg.txt").
         (Default: "logNo.txt,logPos.txt,logNeg.txt")
-    
+
     --fps:
         Frames per second used in the video. Defaults to 25 or is auto-detected based on the video file type.
         (Default: 25)
-    
+
     --starting-frame:
         Starting frame number used as the basis for computing frame intervals.
         (Default: 1)
-    
+
     --frame-interval:
         Number of frames to add as an interval between segments.
         (Default: 0)
@@ -103,6 +103,7 @@ def process_log_files(log: pd.DataFrame, classNum: int):
     processed_log["endframe"] = np.nan
     return processed_log
 
+
 def create_dataset(
     frame_counts: pd.DataFrame,
     processed_counts: pd.DataFrame,
@@ -126,14 +127,14 @@ def create_dataset(
     dataset["filename"] = dataset["filename"].ffill()
     dataset = dataset.dropna(subset=["filename"]).reset_index(drop=True)
     # for frames
-    
+
     # let's seperate into video rows and change rows.
     # IMPORTANT this method, especially if you have a begin-frame greater than zero
     # can cause the begin frame to be higher than the end frame. This will get rooted
     # out in the dataset checker
     for i in range(len(dataset)):
         if i == len(dataset) - 1:
-            # if it's the last row, then do something special 
+            # if it's the last row, then do something special
             row_value = frame_counts.loc[
                 frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
             ]
@@ -144,7 +145,7 @@ def create_dataset(
                 )
         elif np.isnan(dataset.loc[i, "beginframe"]) and np.isnan(
             dataset.loc[i, "endframe"]
-        ): 
+        ):
             # if it's a switch (e.g. a time object between logNo, logPos, and logNeg)
             # then the end and begin frame are counted on the time diffece between the
             # next rows
@@ -163,7 +164,7 @@ def create_dataset(
             dataset.loc[i, "endframe"] = row_value.values[0]
         elif i == 0 and np.isnan(dataset.loc[i, "endframe"]):
             # it's the first frame row and there's no end frame (e.g. it's a video object)
-            # the then end frame would be the next row times the fps (this is separate from 
+            # the then end frame would be the next row times the fps (this is separate from
             # the next elif because of the issues of being first)
             dataset.loc[i, "endframe"] = round(
                 (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
@@ -172,7 +173,7 @@ def create_dataset(
         elif dataset.loc[i, "beginframe"] == starting_frame and np.isnan(
             dataset.loc[i, "endframe"]
         ):
-            # if it's the starting row, the end frame is the times to the next 
+            # if it's the starting row, the end frame is the times to the next
             # row times the fps
             dataset.loc[i, "endframe"] = round(
                 (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
@@ -262,10 +263,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--end-frame-buffer",
-        type=int, 
+        type=int,
         help="the buffer for each dataset.csv end frame",
         default=0,
-        required=False
+        required=False,
     )
 
     args = parser.parse_args()
@@ -277,7 +278,7 @@ if __name__ == "__main__":
     video_files = [
         file for file in dir_files if file.endswith(".mp4") or file.endswith(".h264")
     ]
-    
+
     if video_files[0].endswith(".mp4"):
         fps = utils.get_video_info(files, path)
     elif video_files[0].endswith(".h264"):
@@ -287,15 +288,25 @@ if __name__ == "__main__":
     counts = pd.read_csv(os.path.join(path, counts_file))
     processed_counts = process_frame_count(counts, args.starting_frame)
     list_of_logs = []
-    
+
     class_idx = 0
+    with open(os.path.join(args.path, "RUN_DESCRIPTION.txt"), "w+") as rd:
+        rd.write(f"\n-- Class Relations --\n")
+
     for file in files:
-        logging.info(f"Assigning class number {class_idx} to class {(file.split('.')[0][3:]).upper()}")
+        logging.info(
+            f"Assigning class number {class_idx} to class {(file.split('.')[0][3:]).upper()}"
+        )
+
+        with open(os.path.join(args.path, "RUN_DESCRIPTION.txt"), "w+") as rd:
+            rd.write(
+                f"Assigning class number {class_idx} to class {(file.split('.')[0][3:]).upper()} \n"
+            )
+
         logFile = pd.read_csv(os.path.join(path, file), names=["frame_name"])
         processed_logfile = process_log_files(logFile, class_idx)
         list_of_logs.append(processed_logfile)
 
-        
         class_idx += 1
 
     dset = create_dataset(
@@ -306,10 +317,10 @@ if __name__ == "__main__":
         args.frame_interval,
         *list_of_logs,
     )
-    
+
     for dset_idx in range(len(dset.index)):
         dset.loc[dset_idx].endframe -= args.end_frame_buffer
-    
+
     dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
     # check using dataset_checker.py
     from dataset_checker import check_dataset
