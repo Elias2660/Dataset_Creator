@@ -5,6 +5,8 @@ log*.txt
 *.h264
 dataset*
 
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
