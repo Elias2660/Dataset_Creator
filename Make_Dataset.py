@@ -290,7 +290,7 @@ if __name__ == "__main__":
     list_of_logs = []
 
     class_idx = 0
-    with open(os.path.join(args.path, "RUN_DESCRIPTION.txt"), "a+") as rd:
+    with open(os.path.join(args.path, "RUN_DESCRIPTION.log"), "a+") as rd:
         rd.write(f"\n-- Class Relations --\n")
 
     for file in files:
@@ -298,7 +298,7 @@ if __name__ == "__main__":
             f"Assigning class number {class_idx} to class {(file.split('.')[0][3:]).upper()}"
         )
 
-        with open(os.path.join(args.path, "RUN_DESCRIPTION.txt"), "a+") as rd:
+        with open(os.path.join(args.path, "RUN_DESCRIPTION.log"), "a+") as rd:
             rd.write(
                 f"Assigning class number {class_idx} to class {(file.split('.')[0][3:]).upper()} \n"
         )
