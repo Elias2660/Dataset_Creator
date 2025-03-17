@@ -46,8 +46,8 @@ def check_dataset(path: str, counts: pd.DataFrame):
         )
         return
     logging.info(f"Cleaning dataset")
-    for i in faulty_rows:
-        dataset.drop(i, inplace=True)
+    dataset.drop(index=faulty_rows, inplace=True)
+
 
     dataset.reset_index(drop=True, inplace=True)
     logging.info(f"Dataset has been cleaned, moving old dataset to backup")
