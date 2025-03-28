@@ -2,6 +2,8 @@
 
 A comprehensive data processing and analysis project focusing on time-stamped log data.
 
+This project is most used with the [Unified-bee-Runner](https://github.com/Elias2660/Unified-bee-Runner).
+
 ## Introduction
 
 This project involves processing and analyzing time-stamped log data stored in various text files. The data is used to generate insights and visualizations. The primary purpose is to handle log files efficiently, perform necessary transformations, and enable seamless data analysis.
@@ -30,8 +32,8 @@ python Make_Dataset.py
 
 ## License
 
-This project is licensed under the terms specified in the [LICENSE](LICENSE) file.
+This project is licensed under the [MIT License](LICENSE).
 
 ## Security
 
-For security guidelines and policies, refer to [SECURITY.md](SECURITY.md).
+Please review our [Security Policy](SECURITY.md) for guidelines on reporting vulnerabilities.
