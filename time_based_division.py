@@ -7,6 +7,8 @@ Description:
     and an ending frame buffer, then assigns these intervals to a class. The final output is a CSV file ("dataset.csv") 
     that aggregates each video's filename, class label, begin frame, and end frame into different classes based on time.
 
+    This script is meant to run to test how much a model can infer based on the time period that the dataset is run
+
 Usage:
     Run the script from the command line in the following format:
         python time_based_division.py [--path PATH] [--counts COUNTS_CSV]

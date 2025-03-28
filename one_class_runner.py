@@ -5,6 +5,8 @@ This script processes a counts CSV file containing video information and generat
 each video's frame count into several splits. Each video is treated as a distinct class, and for each class,
 the script creates frame intervals and produces multiple dataset files with one frame interval per class per file.
 
+This is meant to run with testing scripts that create one video for each class.
+
 Usage:
     Run the script from the command line in the following format:
         python one_class_runner.py [--path PATH] [--counts COUNTS_CSV]
