@@ -70,8 +70,10 @@ import logging
 def process_frame_count(counts: pd.DataFrame, starting_frame: int) -> pd.DataFrame:
     """
 
-    :param counts: pd.DataFrame:
+    :param counts: pd.DataFrame
+    :param starting_frame: int
 
+    prepare the frame counts to be combined with the other files
     """
     processed_counts = pd.DataFrame()
     nc = counts.copy()
@@ -94,6 +96,7 @@ def process_log_files(log: pd.DataFrame, classNum: int):
     :param log: pd.DataFrame:
     :param classNum: int:
 
+    prepare a log file to be written to to the dataset.csv file
     """
     processed_log = pd.DataFrame()
     processed_log["time"] = pd.to_datetime(log["frame_name"], format="%Y%m%d_%H%M%S")
@@ -128,7 +131,7 @@ def create_dataset(
     dataset = dataset.dropna(subset=["filename"]).reset_index(drop=True)
     # for frames
 
-    # let's seperate into video rows and change rows.
+    # let's separate into video rows and change rows.
     # IMPORTANT this method, especially if you have a begin-frame greater than zero
     # can cause the begin frame to be higher than the end frame. This will get rooted
     # out in the dataset checker
@@ -287,9 +290,11 @@ if __name__ == "__main__":
 
     counts = pd.read_csv(os.path.join(path, counts_file))
     processed_counts = process_frame_count(counts, args.starting_frame)
-    list_of_logs = []
+    list_of_logs = [] # allow for any number of log files
 
     class_idx = 0
+
+    # add class-dataset class name relations to RUN_DESCRIPTION.log for clarity
     with open(os.path.join(args.path, "RUN_DESCRIPTION.log"), "a+") as rd:
         rd.write(f"\n-- Class Relations --\n")
 
@@ -325,4 +330,5 @@ if __name__ == "__main__":
     # check using dataset_checker.py
     from dataset_checker import check_dataset
 
+    # the dataset algo automatically can create inconsistencies
     check_dataset(os.path.join(path, "dataset.csv"), counts)
