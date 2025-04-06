@@ -54,11 +54,12 @@ Dependencies:
     - random: For random selection of intervals during dataset file creation.
 """
 
-import pandas as pd
-import logging
 import argparse
+import logging
 import os
 import random
+
+import pandas as pd
 
 if __name__ == "__main__":
     logging.basicConfig(

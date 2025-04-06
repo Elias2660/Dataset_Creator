@@ -60,11 +60,13 @@ Returns:
 """
 
 import argparse
+import logging
 import os
+
 import numpy as np
 import pandas as pd
+
 import utils
-import logging
 
 
 def process_frame_count(counts: pd.DataFrame, starting_frame: int) -> pd.DataFrame:

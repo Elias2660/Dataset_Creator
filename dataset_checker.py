@@ -34,11 +34,12 @@ Notes:
     - ANSI escape sequences are stripped from the file search output using regex to ensure clean file names.
 """
 
-import pandas as pd
-import subprocess
-import re
-import logging
 import argparse
+import logging
+import re
+import subprocess
+
+import pandas as pd
 
 
 def check_dataset(path: str, counts: pd.DataFrame):
