@@ -17,19 +17,19 @@ Arguments:
     --path:
         Path to the directory containing the counts CSV file.
         (Default: ".")
-    
+
     --counts:
         Filename for the counts CSV file, expected to have columns including at least 'filename' and 'framecount'.
         (Default: "counts.csv")
-    
+
     --start-frame:
         The starting frame number to consider when splitting frames.
         (Default: 0)
-    
+
     --end-frame-buffer:
         Number of frames to reserve at the end, effectively reducing the total frames considered.
         (Default: 0)
-    
+
     --splits:
         Number of splits (or segments) per video. The script divides each video's usable frames into this many segments.
         (Default: 3)
