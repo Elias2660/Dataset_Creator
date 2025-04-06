@@ -1,7 +1,7 @@
 """
 one_class_runner.py
 
-This script processes a counts CSV file containing video information and generates dataset CSV files by partitioning
+This script processes a counts csv file containing video information and generates dataset CSV files by partitioning
 each video's frame count into several splits. Each video is treated as a distinct class, and for each class,
 the script creates frame intervals and produces multiple dataset files with one frame interval per class per file.
 

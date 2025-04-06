@@ -128,4 +128,5 @@ if __name__ == "__main__":
     logging.info(f"found dataset files: {file_list}")
     counts = pd.read_csv(arguments.counts)
     for file in file_list:
+        # TODO make this check dataset command less verbose
         check_dataset(file, counts)
