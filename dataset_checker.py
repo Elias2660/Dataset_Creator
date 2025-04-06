@@ -51,7 +51,8 @@ def check_dataset(path: str, counts: pd.DataFrame):
             > counts[dataset.iloc[i, 0] == counts["filename"]]["framecount"].values[0]
         ):
             # end frame greater than video end frame check
-            logging.info(f"-- Error: Found Error Row: {dataset.iloc[i].to_dict()} --")
+            logging.info(
+                f"-- Error: Found Error Row: {dataset.iloc[i].to_dict()} --")
             logging.info(
                 f"Error: Dataset has end frame ({dataset.iloc[i, 3]}) greater than total video frames at row {i}, which is {counts[dataset.iloc[i, 0] == counts['filename']]['framecount'].values[0]}"
             )
@@ -61,19 +62,22 @@ def check_dataset(path: str, counts: pd.DataFrame):
 
         if dataset.iloc[i].isnull().values.any():
             # null value check
-            logging.info(f"\t Error: Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
+            logging.info(
+                f"\t Error: Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
             logging.info(f"\t Error: Dataset has missing values at row {i}")
             faulty_rows.append(i)
         elif int(dataset.iloc[i, 2]) >= int(dataset.iloc[i, 3]):
             # frame order check
-            logging.info(f"\t Error: Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
+            logging.info(
+                f"\t Error: Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
             logging.info(
                 f"\t Error: Dataset has begin frame greater than or equal to end frame at row {i}"
             )
             faulty_rows.append(i)
         elif int(dataset.iloc[i, 2]) < 0 or int(dataset.iloc[i, 3]) < 0:
             # negative frame check
-            logging.info(f"\t Error: Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
+            logging.info(
+                f"\t Error: Found Error Row: {dataset.iloc[i]}".replace("\n", " "))
             logging.info(
                 f"\t Error: Dataset has begin frame or end frame less than or equal to 0 at row {i}"
             )
@@ -87,7 +91,6 @@ def check_dataset(path: str, counts: pd.DataFrame):
         return
     logging.info(f"Cleaning dataset")
     dataset.drop(index=faulty_rows, inplace=True)
-
 
     dataset.reset_index(drop=True, inplace=True)
     logging.info(f"Dataset has been cleaned, moving old dataset to backup")
@@ -119,7 +122,8 @@ if __name__ == "__main__":
 
     arguments = parser.parse_args()
     command = f"ls {arguments.search_string}"
-    output = subprocess.run(command, shell=True, capture_output=True, text=True)
+    output = subprocess.run(command, shell=True,
+                            capture_output=True, text=True)
     # it's weird, but regex is used to find the dataset files
     ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
     file_list = sorted(
