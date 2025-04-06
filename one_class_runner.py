@@ -190,6 +190,5 @@ if __name__ == "__main__":
                     ignore_index=True,
                 )
 
-        dataset_sub.to_csv(os.path.join(
-            args.path, f"dataset_{i}.csv"), index=False)
+        dataset_sub.to_csv(os.path.join(args.path, f"dataset_{i}.csv"), index=False)
         logging.info(f"dataset_{i}.csv created")

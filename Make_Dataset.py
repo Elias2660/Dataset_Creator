@@ -99,8 +99,7 @@ def process_log_files(log: pd.DataFrame, classNum: int):
     prepare a log file to be written to to the dataset.csv file
     """
     processed_log = pd.DataFrame()
-    processed_log["time"] = pd.to_datetime(
-        log["frame_name"], format="%Y%m%d_%H%M%S")
+    processed_log["time"] = pd.to_datetime(log["frame_name"], format="%Y%m%d_%H%M%S")
     processed_log["filename"] = np.nan
     processed_log["class"] = classNum
     processed_log["beginframe"] = np.nan
@@ -140,15 +139,15 @@ def create_dataset(
         if i == len(dataset) - 1:
             # if it's the last row, then do something special
             row_value = frame_counts.loc[
-                frame_counts["filename"] == dataset.loc[i,
-                                                        "filename"], "framecount"
+                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
             ]
             dataset.loc[i, "endframe"] = row_value.values[0] - frame_interval
             if dataset.loc[i, "beginframe"] != starting_frame:
                 dataset.loc[i, "beginframe"] = (
                     # end frame * 2 because the end of the earlier is already subtracted,
                     #  so you have to add it again twice
-                    dataset.loc[i - 1, "endframe"] + frame_interval * 2
+                    dataset.loc[i - 1, "endframe"]
+                    + frame_interval * 2
                 )
         elif np.isnan(dataset.loc[i, "beginframe"]) and np.isnan(
             dataset.loc[i, "endframe"]
@@ -159,36 +158,42 @@ def create_dataset(
             dataset.loc[i, "beginframe"] = (
                 dataset.loc[i - 1, "endframe"] + frame_interval * 2
             )
-            dataset.loc[i, "endframe"] = dataset.loc[i, "beginframe"] + round(
-                (dataset.loc[i + 1, "time"] -
-                 dataset.loc[i, "time"]).seconds * FPS
-            ) - frame_interval
+            dataset.loc[i, "endframe"] = (
+                dataset.loc[i, "beginframe"]
+                + round(
+                    (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+                )
+                - frame_interval
+            )
         elif dataset.loc[i + 1, "beginframe"] == starting_frame:
             # if it's the video (sourced from the counts.csv), setting the end frame
             # and the row value
             row_value = frame_counts.loc[
-                frame_counts["filename"] == dataset.loc[i,
-                                                        "filename"], "framecount"
+                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
             ]
             dataset.loc[i, "endframe"] = row_value.values[0] - frame_interval
         elif i == 0 and np.isnan(dataset.loc[i, "endframe"]):
             # it's the first frame row and there's no end frame (e.g. it's a video object)
             # the then end frame would be the next row times the fps (this is separate from
             # the next elif because of the issues of being first)
-            dataset.loc[i, "endframe"] = round(
-                (dataset.loc[i + 1, "time"] -
-                 dataset.loc[i, "time"]).seconds * FPS
-            ) - frame_interval
+            dataset.loc[i, "endframe"] = (
+                round(
+                    (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+                )
+                - frame_interval
+            )
 
         elif dataset.loc[i, "beginframe"] == starting_frame and np.isnan(
             dataset.loc[i, "endframe"]
         ):
             # if it's the starting row, the end frame is the times to the next
             # row times the fps
-            dataset.loc[i, "endframe"] = round(
-                (dataset.loc[i + 1, "time"] -
-                 dataset.loc[i, "time"]).seconds * FPS
-            ) - frame_interval
+            dataset.loc[i, "endframe"] = (
+                round(
+                    (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+                )
+                - frame_interval
+            )
 
         # for classes
         if np.isnan(dataset.loc[i, "class"]) and i == 0:
