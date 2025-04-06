@@ -79,8 +79,6 @@ def process_frame_count(counts: pd.DataFrame,
     prepare the frame counts to be combined with the other files
     :param counts: pd.DataFrame:
     :param starting_frame: int:
-    :param counts: pd.DataFrame:
-    :param starting_frame: int:
 
     """
     processed_counts = pd.DataFrame()
@@ -105,8 +103,6 @@ def process_log_files(log: pd.DataFrame, classNum: int):
     :param classNum: int:
 
     prepare a log file to be written to to the dataset.csv file
-    :param log: pd.DataFrame:
-    :param classNum: int:
     :param log: pd.DataFrame:
     :param classNum: int:
 
@@ -136,11 +132,6 @@ def create_dataset(
     :param FPS: param *args:
     :param frame_counts: pd.DataFrame:
     :param processed_counts: pd.DataFrame:
-    :param frame_counts: pd.DataFrame:
-    :param processed_counts: pd.DataFrame:
-    :param FPS: int:
-    :param starting_frame: int:
-    :param frame_interval: int:
     :param frame_counts: pd.DataFrame:
     :param processed_counts: pd.DataFrame:
     :param FPS: int:

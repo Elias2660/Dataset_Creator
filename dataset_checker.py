@@ -46,8 +46,6 @@ def check_dataset(path: str, counts: pd.DataFrame):
 
     :param path: str:
     :param counts: pd.DataFrame:
-    :param path: str:
-    :param counts: pd.DataFrame:
 
     """
     dataset = pd.read_csv(path)
