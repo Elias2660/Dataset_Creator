@@ -144,7 +144,7 @@ def create_dataset(
             dataset.loc[i, "endframe"] = row_value.values[0]
             if dataset.loc[i, "beginframe"] != starting_frame:
                 dataset.loc[i, "beginframe"] = (
-                    dataset.loc[i - 1, "endframe"] + 1 + frame_interval
+                    dataset.loc[i - 1, "endframe"] + frame_interval
                 )
         elif np.isnan(dataset.loc[i, "beginframe"]) and np.isnan(
             dataset.loc[i, "endframe"]
@@ -153,7 +153,7 @@ def create_dataset(
             # then the end and begin frame are counted on the time diffece between the
             # next rows
             dataset.loc[i, "beginframe"] = (
-                dataset.loc[i - 1, "endframe"] + 1 + frame_interval
+                dataset.loc[i - 1, "endframe"] + frame_interval
             )
             dataset.loc[i, "endframe"] = dataset.loc[i, "beginframe"] + round(
                 (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
