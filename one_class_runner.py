@@ -68,8 +68,7 @@ if __name__ == "__main__":
     )
 
     parser = argparse.ArgumentParser(
-        description=
-        "Special case for dataprep videos where each video is one different class"
+        description="Special case for dataprep videos where each video is one different class"
     )
     parser.add_argument(
         "--path",

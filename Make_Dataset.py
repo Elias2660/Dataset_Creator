@@ -253,16 +253,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--files",
         type=str,
-        help=
-        "name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
+        help="name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
         default="logNo.txt,logPos.txt,logNeg.txt",
         required=False,
     )
     parser.add_argument(
         "--fps",
         type=int,
-        help=
-        "frames per second, default 25. If mp4, it will be automatically detected",
+        help="frames per second, default 25. If mp4, it will be automatically detected",
         default=25,
         required=False,
     )
