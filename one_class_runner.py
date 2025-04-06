@@ -1,7 +1,7 @@
 """
 one_class_runner.py
 
-This script processes a counts CSV file containing video information and generates dataset CSV files by partitioning
+This script processes a counts csv file containing video information and generates dataset CSV files by partitioning
 each video's frame count into several splits. Each video is treated as a distinct class, and for each class,
 the script creates frame intervals and produces multiple dataset files with one frame interval per class per file.
 
@@ -17,19 +17,19 @@ Arguments:
     --path:
         Path to the directory containing the counts CSV file.
         (Default: ".")
-    
+
     --counts:
         Filename for the counts CSV file, expected to have columns including at least 'filename' and 'framecount'.
         (Default: "counts.csv")
-    
+
     --start-frame:
         The starting frame number to consider when splitting frames.
         (Default: 0)
-    
+
     --end-frame-buffer:
         Number of frames to reserve at the end, effectively reducing the total frames considered.
         (Default: 0)
-    
+
     --splits:
         Number of splits (or segments) per video. The script divides each video's usable frames into this many segments.
         (Default: 3)
@@ -53,12 +53,12 @@ Dependencies:
     - os: For file path operations.
     - random: For random selection of intervals during dataset file creation.
 """
-
-import pandas as pd
-import logging
 import argparse
+import logging
 import os
 import random
+
+import pandas as pd
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -68,7 +68,8 @@ if __name__ == "__main__":
     )
 
     parser = argparse.ArgumentParser(
-        description="Special case for dataprep videos where each video is one different class"
+        description=
+        "Special case for dataprep videos where each video is one different class"
     )
     parser.add_argument(
         "--path",
@@ -110,41 +111,33 @@ if __name__ == "__main__":
     logging.info("Running the Dataset_Creator/one_class_runner.py script")
     logging.info("Finding Dataset files")
 
-    logging.info(
-        f"Arguments: path={args.path},"
-        f" counts={args.counts}, "
-        f" start_frame={args.start_frame}, "
-        f"end_frame_buffer={args.end_frame_buffer}, "
-        f" splits={args.splits}"
-    )
+    logging.info(f"Arguments: path={args.path},"
+                 f" counts={args.counts}, "
+                 f" start_frame={args.start_frame}, "
+                 f"end_frame_buffer={args.end_frame_buffer}, "
+                 f" splits={args.splits}")
 
     counts = pd.read_csv(os.path.join(args.path, args.counts))
 
     final_dataframe = pd.DataFrame(
-        columns=["filename", "class", "beginframe", "endframe"]
-    )
+        columns=["filename", "class", "beginframe", "endframe"])
     class_count = 0
 
     for row in counts.iterrows():
-        frame_interval = (
-            row[1]["framecount"] - args.end_frame_buffer - args.start_frame
-        ) // args.splits
+        frame_interval = (row[1]["framecount"] - args.end_frame_buffer -
+                          args.start_frame) // args.splits
         begin_frame = args.start_frame
         end_frame = frame_interval
         for split in range(args.splits):
             final_dataframe = pd.concat(
                 [
                     final_dataframe,
-                    pd.DataFrame(
-                        [
-                            {
-                                "filename": row[1]["filename"],
-                                "class": class_count,
-                                "beginframe": begin_frame,
-                                "endframe": end_frame,
-                            }
-                        ]
-                    ),
+                    pd.DataFrame([{
+                        "filename": row[1]["filename"],
+                        "class": class_count,
+                        "beginframe": begin_frame,
+                        "endframe": end_frame,
+                    }]),
                 ],
                 ignore_index=True,
             )
@@ -159,8 +152,7 @@ if __name__ == "__main__":
         logging.info(f"Creating dataset_{i}.csv")
         # for each class, create a dataset file
         dataset_sub = pd.DataFrame(
-            columns=["file", "class", "begin frame", "end frame"]
-        )
+            columns=["file", "class", "begin frame", "end frame"])
         for class_num in range(0, class_count):
             # find all rows with class equal to class count
             class_rows = final_dataframe[final_dataframe["class"] == class_num]
@@ -184,11 +176,11 @@ if __name__ == "__main__":
                                 "filename": "file",
                                 "beginframe": "begin frame",
                                 "endframe": "end frame",
-                            }
-                        ),
+                            }),
                     ],
                     ignore_index=True,
                 )
 
-        dataset_sub.to_csv(os.path.join(args.path, f"dataset_{i}.csv"), index=False)
+        dataset_sub.to_csv(os.path.join(args.path, f"dataset_{i}.csv"),
+                           index=False)
         logging.info(f"dataset_{i}.csv created")
