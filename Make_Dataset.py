@@ -59,7 +59,6 @@ Dependencies:
 Returns:
     A CSV file ("dataset.csv") that aggregates each video's filename, class label, beginning frame, and ending frame.
 """
-
 import argparse
 import logging
 import os

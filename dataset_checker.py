@@ -33,7 +33,6 @@ Notes:
       primarily on Unix-like systems).
     - ANSI escape sequences are stripped from the file search output using regex to ensure clean file names.
 """
-
 import argparse
 import logging
 import re
