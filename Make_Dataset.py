@@ -74,10 +74,12 @@ def process_frame_count(counts: pd.DataFrame, starting_frame: int) -> pd.DataFra
 
     :param counts: pd.DataFrame
     :param starting_frame: int
-
+    
     prepare the frame counts to be combined with the other files
     :param counts: pd.DataFrame:
     :param starting_frame: int:
+    :param counts: pd.DataFrame: 
+    :param starting_frame: int: 
 
     """
     processed_counts = pd.DataFrame()
@@ -100,10 +102,12 @@ def process_log_files(log: pd.DataFrame, classNum: int):
 
     :param log: pd.DataFrame:
     :param classNum: int:
-
+    
     prepare a log file to be written to to the dataset.csv file
     :param log: pd.DataFrame:
     :param classNum: int:
+    :param log: pd.DataFrame: 
+    :param classNum: int: 
 
     """
     processed_log = pd.DataFrame()
@@ -135,7 +139,12 @@ def create_dataset(
     :param FPS: int:
     :param starting_frame: int:
     :param frame_interval: int:
-    :param *args:
+    :param frame_counts: pd.DataFrame: 
+    :param processed_counts: pd.DataFrame: 
+    :param FPS: int: 
+    :param starting_frame: int: 
+    :param frame_interval: int: 
+    :param *args: 
 
     """
     dataset = pd.concat([processed_counts, *args], ignore_index=True)
