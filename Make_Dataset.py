@@ -123,6 +123,7 @@ def create_dataset(
     FPS: int,
     starting_frame: int,
     frame_interval: int,
+    end_frame_buffer:int,
     *args,
 ) -> pd.DataFrame:
     """
@@ -130,13 +131,9 @@ def create_dataset(
     :param frame_counts: pd.DataFrame:
     :param processed_counts: pd.DataFrame:
     :param FPS: param *args:
-    :param frame_counts: pd.DataFrame:
-    :param processed_counts: pd.DataFrame:
-    :param frame_counts: pd.DataFrame:
-    :param processed_counts: pd.DataFrame:
-    :param FPS: int:
-    :param starting_frame: int:
-    :param frame_interval: int:
+    starting_frame: int,
+    frame_interval: int,
+    end_frame_buffer:int,
     :param *args:
 
     """
@@ -154,47 +151,49 @@ def create_dataset(
     for i in range(len(dataset)):
         if i == len(dataset) - 1:
             # if it's the last row, then do something special
-            row_value = frame_counts.loc[frame_counts["filename"] ==
-                                         dataset.loc[i,
-                                                     "filename"], "framecount"]
+            row_value = frame_counts.loc[
+                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
+            ]
             dataset.loc[i, "endframe"] = row_value.values[0] - frame_interval
             if dataset.loc[i, "beginframe"] != starting_frame:
                 dataset.loc[i, "beginframe"] = (
                     # end frame * 2 because the end of the earlier is already subtracted,
-                    #  so you have to add it again twice
-                    dataset.loc[i - 1, "endframe"] + frame_interval * 2)
+                    #  so you have to add it again twice 
+                    dataset.loc[i - 1, "endframe"] + frame_interval * 2
+                )
         elif np.isnan(dataset.loc[i, "beginframe"]) and np.isnan(
                 dataset.loc[i, "endframe"]):
             # if it's a switch (e.g. a time object between logNo, logPos, and logNeg)
             # then the end and begin frame are counted on the time difference between the
             # next rows
-            dataset.loc[i, "beginframe"] = (dataset.loc[i - 1, "endframe"] +
-                                            frame_interval * 2)
-            dataset.loc[i, "endframe"] = (dataset.loc[i, "beginframe"] + round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
-                FPS) - frame_interval)
+            dataset.loc[i, "beginframe"] = (
+                dataset.loc[i - 1, "endframe"] + frame_interval * 2
+            )
+            dataset.loc[i, "endframe"] = dataset.loc[i, "beginframe"] + round(
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+            ) - frame_interval
         elif dataset.loc[i + 1, "beginframe"] == starting_frame:
             # if it's the video (sourced from the counts.csv), setting the end frame
             # and the row value
-            row_value = frame_counts.loc[frame_counts["filename"] ==
-                                         dataset.loc[i,
-                                                     "filename"], "framecount"]
-            dataset.loc[i, "endframe"] = row_value.values[0] - frame_interval
+            row_value = frame_counts.loc[
+                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
+            ]
+            dataset.loc[i, "endframe"] = row_value.values[0] - end_frame_buffer
         elif i == 0 and np.isnan(dataset.loc[i, "endframe"]):
             # it's the first frame row and there's no end frame (e.g. it's a video object)
             # the then end frame would be the next row times the fps (this is separate from
             # the next elif because of the issues of being first)
-            dataset.loc[i, "endframe"] = (round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
-                FPS) - frame_interval)
+            dataset.loc[i, "endframe"] = round(
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+            ) - frame_interval
 
         elif dataset.loc[i, "beginframe"] == starting_frame and np.isnan(
                 dataset.loc[i, "endframe"]):
             # if it's the starting row, the end frame is the times to the next
             # row times the fps
-            dataset.loc[i, "endframe"] = (round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
-                FPS) - frame_interval)
+            dataset.loc[i, "endframe"] = round(
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
+            ) - frame_interval
 
         # for classes
         if np.isnan(dataset.loc[i, "class"]) and i == 0:
@@ -337,6 +336,7 @@ if __name__ == "__main__":
         fps,
         args.starting_frame,
         args.frame_interval,
+        args.end_frame_buffer,
         *list_of_logs,
     )
 
