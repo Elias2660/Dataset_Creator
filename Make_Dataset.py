@@ -302,7 +302,7 @@ if __name__ == "__main__":
         fps = utils.get_video_info(files, path)
     elif video_files[0].endswith(".h264"):
         # this is because finding the frames per second of a .h264 file is a pain in the ass
-        fps = 25
+        fps = args.fps
 
     counts = pd.read_csv(os.path.join(path, counts_file))
     processed_counts = process_frame_count(counts, args.starting_frame)
@@ -340,8 +340,7 @@ if __name__ == "__main__":
         *list_of_logs,
     )
 
-    for dset_idx in range(len(dset.index)):
-        dset.loc[dset_idx].endframe -= args.end_frame_buffer
+    dset["endframe"] = dset["endframe"] - args.end_frame_buffer
 
     dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
     # check using dataset_checker.py
