@@ -299,7 +299,7 @@ if __name__ == "__main__":
     ]
 
     if video_files[0].endswith(".mp4"):
-        fps = utils.get_video_info(files, path)
+        fps = utils.get_video_info(video_files, path)
         logging.info(f"Found fps {fps}")
     elif video_files[0].endswith(".h264"):
         # this is because finding the frames per second of a .h264 file is a pain in the ass
