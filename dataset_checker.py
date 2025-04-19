@@ -56,9 +56,7 @@ def check_dataset(path: str, counts: pd.DataFrame):
                 i, 0] == counts["filename"]]["framecount"].values[0]):
             # end frame greater than video end frame check
             logging.info(
-                f"-- Error: Found Error Row: {dataset.iloc[i].to_dict()} --")
-            logging.info(
-                f"Error: Dataset has end frame ({dataset.iloc[i, 3]}) greater than total video frames at row {i}, which is {counts[dataset.iloc[i, 0] == counts['filename']]['framecount'].values[0]}"
+                f"Error in row {dataset.iloc[i].to_dict()}: Dataset has end frame ({dataset.iloc[i, 3]}) greater than total video frames at row {i}, which is {counts[dataset.iloc[i, 0] == counts['filename']]['framecount'].values[0]}"
             )
             dataset.iloc[i, 3] = counts[dataset.iloc[
                 i, 0] == counts["filename"]]["framecount"].values[0]
@@ -66,27 +64,20 @@ def check_dataset(path: str, counts: pd.DataFrame):
         if dataset.iloc[i].isnull().values.any():
             # null value check
             logging.info(
-                f"\t Error: Found Error Row: {dataset.iloc[i]}".replace(
-                    "\n", " "))
-            logging.info(f"\t Error: Dataset has missing values at row {i}")
+                f"\t Error: Found Error at Row {i}: {dataset.iloc[i]}: missing values at row"
+                .replace("\n", " ").replace("  ", " "))
             faulty_rows.append(i)
         elif int(dataset.iloc[i, 2]) >= int(dataset.iloc[i, 3]):
             # frame order check
             logging.info(
-                f"\t Error: Found Error Row: {dataset.iloc[i]}".replace(
-                    "\n", " "))
-            logging.info(
-                f"\t Error: Dataset has begin frame greater than or equal to end frame at row {i}"
-            )
+                f"\t Error: Found Error at row {i}: {dataset.iloc[i]}: begin frame greater than or equal to end frame"
+                .replace("\n", " "))
             faulty_rows.append(i)
         elif int(dataset.iloc[i, 2]) < 0 or int(dataset.iloc[i, 3]) < 0:
             # negative frame check
             logging.info(
-                f"\t Error: Found Error Row: {dataset.iloc[i]}".replace(
-                    "\n", " "))
-            logging.info(
-                f"\t Error: Dataset has begin frame or end frame less than or equal to 0 at row {i}"
-            )
+                f"\t Error: Found Error at row {i}: {dataset.iloc[i]}: begin frame or end frame less than or equal to 0"
+                .replace("\n", " "))
             faulty_rows.append(i)
     logging.info(f"Found {len(faulty_rows)} faulty rows")
 
@@ -139,5 +130,4 @@ if __name__ == "__main__":
     logging.info(f"found dataset files: {file_list}")
     counts = pd.read_csv(arguments.counts)
     for file in file_list:
-        # TODO make this check dataset command less verbose
         check_dataset(file, counts)
