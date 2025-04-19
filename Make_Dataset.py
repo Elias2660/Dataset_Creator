@@ -52,9 +52,7 @@ import pandas as pd
 import utils
 
 
-def process_frame_count(
-    counts: pd.DataFrame,
-) -> pd.DataFrame:
+def process_frame_count(counts: pd.DataFrame, ) -> pd.DataFrame:
     """
     prepare the frame counts to be combined with the other files
     :param counts: pd.DataFrame:
@@ -87,7 +85,8 @@ def process_log_files(log: pd.DataFrame, classNum: int):
 
     """
     processed_log = pd.DataFrame()
-    processed_log["time"] = pd.to_datetime(log["frame_name"], format="%Y%m%d_%H%M%S")
+    processed_log["time"] = pd.to_datetime(log["frame_name"],
+                                           format="%Y%m%d_%H%M%S")
     processed_log["filename"] = np.nan
     processed_log["class"] = classNum
     processed_log["beginframe"] = np.nan
@@ -123,47 +122,46 @@ def create_dataset(
     for i in range(len(dataset)):
         if i == len(dataset) - 1:
             # if it's the last row, then do something special
-            row_value = frame_counts.loc[
-                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
-            ]
+            row_value = frame_counts.loc[frame_counts["filename"] ==
+                                         dataset.loc[i,
+                                                     "filename"], "framecount"]
             dataset.loc[i, "endframe"] = row_value.values[0]
             if dataset.loc[i, "beginframe"] != 0:
                 dataset.loc[i, "beginframe"] = (
                     # end frame * 2 because the end of the earlier is already subtracted,
                     #  so you have to add it again twice
-                    dataset.loc[i - 1, "endframe"]
-                )
+                    dataset.loc[i - 1, "endframe"])
         elif np.isnan(dataset.loc[i, "beginframe"]) and np.isnan(
-            dataset.loc[i, "endframe"]
-        ):
+                dataset.loc[i, "endframe"]):
             # if it's a switch (e.g. a time object between logNo, logPos, and logNeg)
             # then the end and begin frame are counted on the time difference between the
             # next rows
             dataset.loc[i, "beginframe"] = dataset.loc[i - 1, "endframe"]
             dataset.loc[i, "endframe"] = dataset.loc[i, "beginframe"] + round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
-            )
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
+                FPS)
         elif dataset.loc[i + 1, "beginframe"] == 0:
             # if it's the video (sourced from the counts.csv), setting the end frame
             # and the row value
-            row_value = frame_counts.loc[
-                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
-            ]
+            row_value = frame_counts.loc[frame_counts["filename"] ==
+                                         dataset.loc[i,
+                                                     "filename"], "framecount"]
             dataset.loc[i, "endframe"] = row_value.values[0]
         elif i == 0 and np.isnan(dataset.loc[i, "endframe"]):
             # it's the first frame row and there's no end frame (e.g. it's a video object)
             # the then end frame would be the next row times the fps (this is separate from
             # the next elif because of the issues of being first)
             dataset.loc[i, "endframe"] = round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
-            )
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
+                FPS)
 
-        elif dataset.loc[i, "beginframe"] == 0 and np.isnan(dataset.loc[i, "endframe"]):
+        elif dataset.loc[i, "beginframe"] == 0 and np.isnan(
+                dataset.loc[i, "endframe"]):
             # if it's the starting row, the end frame is the times to the next
             # row times the fps
             dataset.loc[i, "endframe"] = round(
-                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
-            )
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds *
+                FPS)
 
         # for classes
         if np.isnan(dataset.loc[i, "class"]) and i == 0:
@@ -181,9 +179,8 @@ def create_dataset(
     return dataset
 
 
-def add_buffering(
-    dset: pd.DataFrame, starting_frame: int, end_frame_buffer: int, frame_interval: int
-):
+def add_buffering(dset: pd.DataFrame, starting_frame: int,
+                  end_frame_buffer: int, frame_interval: int):
     """
     for each row, update so that the
 
@@ -207,19 +204,19 @@ def add_buffering(
             # this takes precedent over applying the starting frame and the end frame buffer
             # TODO: might want to make this collaborative, so that this and applying starting_frame and end_frame_buffer
             # TODO: would work in tandem
-            buffered_dset.loc[i - 1, "endframe"] = (
-                dset.loc[i - 1, "endframe"] - frame_interval
-            )
-            buffered_dset.loc[i, "beginframe"] = (
-                dset.loc[i - 1, "beginframe"] + frame_interval
-            )
+            buffered_dset.loc[i - 1,
+                              "endframe"] = (dset.loc[i - 1, "endframe"] -
+                                             frame_interval)
+            buffered_dset.loc[i,
+                              "beginframe"] = (dset.loc[i - 1, "beginframe"] +
+                                               frame_interval)
 
         elif dset.loc[i, "filename"] != dset.loc[i - 1, "filename"]:
             # here, apply the starting_frame and end_frame_buffer
             buffered_dset.loc[i, "beginframe"] = starting_frame
-            buffered_dset.loc[i - 1, "endframe"] = (
-                dset.loc[i - 1, "endframe"] - end_frame_buffer
-            )
+            buffered_dset.loc[i - 1,
+                              "endframe"] = (dset.loc[i - 1, "endframe"] -
+                                             end_frame_buffer)
 
     return buffered_dset
 
@@ -265,14 +262,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "--files",
         type=str,
-        help="name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
+        help=
+        "name of the log files that one wants to use, default logNo.txt, logNeg.txt, logPos.txt",
         default="logNo.txt,logPos.txt,logNeg.txt",
         required=False,
     )
     parser.add_argument(
         "--fps",
         type=int,
-        help="frames per second, default 25. If mp4, it will be automatically detected",
+        help=
+        "frames per second, default 25. If mp4, it will be automatically detected",
         default=25,
         required=False,
     )
@@ -305,7 +304,8 @@ if __name__ == "__main__":
     files = [file.strip() for file in args.files.split(",")]
     dir_files = os.listdir(path)
     video_files = [
-        file for file in dir_files if file.endswith(".mp4") or file.endswith(".h264")
+        file for file in dir_files
+        if file.endswith(".mp4") or file.endswith(".h264")
     ]
 
     if video_files[0].endswith(".mp4"):
