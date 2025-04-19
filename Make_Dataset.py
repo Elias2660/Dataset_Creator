@@ -42,7 +42,6 @@ Arguments:
         The buffer value subtracted from the computed end frame for each dataset entry.
         (Default: 0)
 """
-
 import argparse
 import logging
 import os
