@@ -88,8 +88,7 @@ def process_log_files(log: pd.DataFrame, classNum: int):
 
     """
     processed_log = pd.DataFrame()
-    processed_log["time"] = pd.to_datetime(
-        log["frame_name"], format="%Y%m%d_%H%M%S")
+    processed_log["time"] = pd.to_datetime(log["frame_name"], format="%Y%m%d_%H%M%S")
     processed_log["filename"] = np.nan
     processed_log["class"] = classNum
     processed_log["beginframe"] = np.nan
@@ -126,8 +125,7 @@ def create_dataset(
         if i == len(dataset) - 1:
             # if it's the last row, then do something special
             row_value = frame_counts.loc[
-                frame_counts["filename"] == dataset.loc[i,
-                                                        "filename"], "framecount"
+                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
             ]
             dataset.loc[i, "endframe"] = row_value.values[0]
             if dataset.loc[i, "beginframe"] != 0:
@@ -144,15 +142,13 @@ def create_dataset(
             # next rows
             dataset.loc[i, "beginframe"] = dataset.loc[i - 1, "endframe"]
             dataset.loc[i, "endframe"] = dataset.loc[i, "beginframe"] + round(
-                (dataset.loc[i + 1, "time"] -
-                 dataset.loc[i, "time"]).seconds * FPS
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
             )
         elif dataset.loc[i + 1, "beginframe"] == 0:
             # if it's the video (sourced from the counts.csv), setting the end frame
             # and the row value
             row_value = frame_counts.loc[
-                frame_counts["filename"] == dataset.loc[i,
-                                                        "filename"], "framecount"
+                frame_counts["filename"] == dataset.loc[i, "filename"], "framecount"
             ]
             dataset.loc[i, "endframe"] = row_value.values[0]
         elif i == 0 and np.isnan(dataset.loc[i, "endframe"]):
@@ -160,16 +156,14 @@ def create_dataset(
             # the then end frame would be the next row times the fps (this is separate from
             # the next elif because of the issues of being first)
             dataset.loc[i, "endframe"] = round(
-                (dataset.loc[i + 1, "time"] -
-                 dataset.loc[i, "time"]).seconds * FPS
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
             )
 
         elif dataset.loc[i, "beginframe"] == 0 and np.isnan(dataset.loc[i, "endframe"]):
             # if it's the starting row, the end frame is the times to the next
             # row times the fps
             dataset.loc[i, "endframe"] = round(
-                (dataset.loc[i + 1, "time"] -
-                 dataset.loc[i, "time"]).seconds * FPS
+                (dataset.loc[i + 1, "time"] - dataset.loc[i, "time"]).seconds * FPS
             )
 
         # for classes
