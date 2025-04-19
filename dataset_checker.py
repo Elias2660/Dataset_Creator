@@ -131,7 +131,8 @@ if __name__ == "__main__":
 
     arguments = parser.parse_args()
     command = f"ls {arguments.search_string}"
-    output = subprocess.run(command, shell=True, capture_output=True, text=True)
+    output = subprocess.run(command, shell=True,
+                            capture_output=True, text=True)
     # it's weird, but regex is used to find the dataset files
     ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
     file_list = sorted(
