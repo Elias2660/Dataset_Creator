@@ -176,7 +176,6 @@ def create_dataset(
 
     # for endframes
     dataset["class"] = dataset["class"].astype(int)
-    print(dataset)
     dataset["beginframe"] = dataset["beginframe"].astype(int)
     dataset["endframe"] = dataset["endframe"].astype(int)
     dataset = dataset.drop(columns=["time"])
@@ -351,16 +350,13 @@ if __name__ == "__main__":
         *list_of_logs,
     )
 
-    print(dset)
-
-    # # add the frame interval, begin frame, and end frame aspects to the dataset
+    # add the frame interval, begin frame, and end frame aspects to the dataset
     dset = add_buffering(
         dset,
         args.starting_frame,
         args.end_frame_buffer,
         args.frame_interval,
     )
-    print(dset)
 
     dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
     # check using dataset_checker.py
