@@ -208,7 +208,7 @@ def add_buffering(dset: pd.DataFrame, starting_frame: int,
                               "endframe"] = (dset.loc[i - 1, "endframe"] -
                                              frame_interval)
             buffered_dset.loc[i,
-                              "beginframe"] = (dset.loc[i - 1, "beginframe"] +
+                              "beginframe"] = (dset.loc[i - 1, "endframe"] +
                                                frame_interval)
 
         elif dset.loc[i, "filename"] != dset.loc[i - 1, "filename"]:
