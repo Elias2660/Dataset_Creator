@@ -107,6 +107,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Check dataset files for missing values and other errors")
     parser.add_argument(
+        "--dataset-csv-path",
+        type=str,
+        help="the path to find the input files for the directory",
+        default="."
+    )
+    parser.add_argument(
+        "--counts-csv-path",
+        type=str,
+        help="The path the the counts.csv file",
+        default="."
+    )
+
+    parser.add_argument(
         "--search-string",
         type=str,
         help="search string to find dataset files",
@@ -114,7 +127,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--counts",
                         type=str,
-                        help="path to counts file",
+                        help="name of the file with frame count per video",
                         default="counts.csv")
 
     arguments = parser.parse_args()

@@ -246,11 +246,16 @@ if __name__ == "__main__":
     """
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
-        "--path",
+        "--in-path",
         type=str,
-        help="path to the directory where the files are located, default .",
+        help="path to where directory is located",
         default=".",
         required=False,
+    )
+    parser.add_argument(
+        "--out-path",
+        type=str,
+        help="path for the output of the workflow"
     )
     parser.add_argument(
         "--counts_file",
@@ -299,24 +304,23 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     logging.info("Running the Dataset_Creator/Make_Dataset.py script")
-    path = args.path
     counts_file = args.counts_file
     files = [file.strip() for file in args.files.split(",")]
-    dir_files = os.listdir(path)
+    dir_files = os.listdir(args.in_path)
     video_files = [
         file for file in dir_files
         if file.endswith(".mp4") or file.endswith(".h264")
     ]
 
     if video_files[0].endswith(".mp4"):
-        fps = utils.get_video_info(video_files, path)
+        fps = utils.get_video_info(video_files, args.in_path)
         logging.info(f"Found fps {fps}")
     elif video_files[0].endswith(".h264"):
         # this is because finding the frames per second of a .h264 file is a pain in the ass
         fps = args.fps
         logging.info(f"Using fps {fps}")
 
-    counts = pd.read_csv(os.path.join(path, counts_file))
+    counts = pd.read_csv(os.path.join(args.in_path, counts_file))
     processed_counts = process_frame_count(counts)
     list_of_logs = []  # allow for any number of log files
 
@@ -336,7 +340,7 @@ if __name__ == "__main__":
                 f"Assigning class number {class_idx} to class {(file.split('.')[0][3:]).upper()} \n"
             )
 
-        logFile = pd.read_csv(os.path.join(path, file), names=["frame_name"])
+        logFile = pd.read_csv(os.path.join(args.in_path, file), names=["frame_name"])
         processed_logfile = process_log_files(logFile, class_idx)
         list_of_logs.append(processed_logfile)
 
@@ -357,9 +361,9 @@ if __name__ == "__main__":
         args.frame_interval,
     )
 
-    dset.to_csv(os.path.join(path, "dataset.csv"), index=False)
+    dset.to_csv(os.path.join(args.out_path, "dataset.csv"), index=False)
     # check using dataset_checker.py
     from dataset_checker import check_dataset
 
     # the dataset algo automatically can create inconsistencies
-    check_dataset(os.path.join(path, "dataset.csv"), counts)
+    check_dataset(os.path.join(args.out_path, "dataset.csv"), counts)

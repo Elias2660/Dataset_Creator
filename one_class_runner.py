@@ -72,12 +72,18 @@ if __name__ == "__main__":
         "Special case for dataprep videos where each video is one different class"
     )
     parser.add_argument(
-        "--path",
+        "--in-path",
         type=str,
         help="path to where directory is located",
         default=".",
         required=False,
     )
+    parser.add_argument(
+        "--out-path",
+        type=str,
+        help="path for the output of the workflow"
+    )
+    
     parser.add_argument(
         "--counts",
         type=str,
@@ -111,13 +117,15 @@ if __name__ == "__main__":
     logging.info("Running the Dataset_Creator/one_class_runner.py script")
     logging.info("Finding Dataset files")
 
-    logging.info(f"Arguments: path={args.path},"
+    logging.info(f"Arguments: in_path={args.in_path},"
+                 f" out_path={args.out_path}"
                  f" counts={args.counts}, "
                  f" start_frame={args.start_frame}, "
-                 f"end_frame_buffer={args.end_frame_buffer}, "
-                 f" splits={args.splits}")
+                 f" end_frame_buffer={args.end_frame_buffer}, "
+                 f" splits={args.splits}"
+                 )
 
-    counts = pd.read_csv(os.path.join(args.path, args.counts))
+    counts = pd.read_csv(os.path.join(args.in_path, args.counts))
 
     final_dataframe = pd.DataFrame(
         columns=["filename", "class", "beginframe", "endframe"])
@@ -146,7 +154,7 @@ if __name__ == "__main__":
 
         class_count += 1
 
-    final_dataframe.to_csv(os.path.join(args.path, "dataset.csv"), index=False)
+    final_dataframe.to_csv(os.path.join(args.out_path, "dataset.csv"), index=False)
 
     for i in range(args.splits):
         logging.info(f"Creating dataset_{i}.csv")
@@ -181,6 +189,6 @@ if __name__ == "__main__":
                     ignore_index=True,
                 )
 
-        dataset_sub.to_csv(os.path.join(args.path, f"dataset_{i}.csv"),
+        dataset_sub.to_csv(os.path.join(args.out_path, f"dataset_{i}.csv"),
                            index=False)
         logging.info(f"dataset_{i}.csv created")

@@ -74,11 +74,16 @@ if __name__ == "__main__":
         description="Splitting up a counts.csv into a dataset.csv that has time based class divisions"
     )
     parser.add_argument(
-        "--path",
+        "--in-path",
         type=str,
         help="path to where directory is located",
         default=".",
         required=False,
+    )
+    parser.add_argument(
+        "--out-path",
+        type=str,
+        help="path for the output of the workflow"
     )
     parser.add_argument(
         "--counts",
@@ -122,7 +127,7 @@ if __name__ == "__main__":
         f"the buffer for the end frame: {args.end_frame_buffer}\n"
     )
 
-    counts = pd.read_csv(os.path.join(args.path, args.counts))
+    counts = pd.read_csv(os.path.join(args.in_path, args.counts))
     number_of_videos = len(counts.index)
     videos_per_class = number_of_videos // args.splits
     logging.info(
@@ -157,5 +162,5 @@ if __name__ == "__main__":
                 end_frame,
             ]
 
-    final_dataframe.to_csv("dataset.csv")
+    final_dataframe.to_csv(os.path.join(args.out_path, "dataset.csv"))
     logging.info("Completed creating the dataset.csv")
