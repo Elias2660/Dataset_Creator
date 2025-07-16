@@ -127,7 +127,7 @@ if __name__ == "__main__":
         f"the buffer for the end frame: {args.end_frame_buffer}\n"
     )
 
-    counts = pd.read_csv(os.path.join(args.in_path, args.counts))
+    counts = pd.read_csv(os.path.join(args.out_path, args.counts))
     number_of_videos = len(counts.index)
     videos_per_class = number_of_videos // args.splits
     logging.info(

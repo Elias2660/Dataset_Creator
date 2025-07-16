@@ -320,14 +320,14 @@ if __name__ == "__main__":
         fps = args.fps
         logging.info(f"Using fps {fps}")
 
-    counts = pd.read_csv(os.path.join(args.in_path, counts_file))
+    counts = pd.read_csv(os.path.join(args.out_path, counts_file))
     processed_counts = process_frame_count(counts)
     list_of_logs = []  # allow for any number of log files
 
     class_idx = 0
 
     # add class-dataset class name relations to RUN_DESCRIPTION.log for clarity
-    with open(os.path.join(args.path, "RUN_DESCRIPTION.log"), "a+") as rd:
+    with open(os.path.join(args.out_path, "RUN_DESCRIPTION.log"), "a+") as rd:
         rd.write(f"\n-- Class Relations --\n")
 
     for file in files:
@@ -335,7 +335,7 @@ if __name__ == "__main__":
             f"Assigning class number {class_idx} to class {(file.split('.')[0][3:]).upper()}"
         )
 
-        with open(os.path.join(args.path, "RUN_DESCRIPTION.log"), "a+") as rd:
+        with open(os.path.join(args.out_path, "RUN_DESCRIPTION.log"), "a+") as rd:
             rd.write(
                 f"Assigning class number {class_idx} to class {(file.split('.')[0][3:]).upper()} \n"
             )

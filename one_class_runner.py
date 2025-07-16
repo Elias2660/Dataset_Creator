@@ -125,7 +125,7 @@ if __name__ == "__main__":
                  f" splits={args.splits}"
                  )
 
-    counts = pd.read_csv(os.path.join(args.in_path, args.counts))
+    counts = pd.read_csv(os.path.join(args.out_path, args.counts))
 
     final_dataframe = pd.DataFrame(
         columns=["filename", "class", "beginframe", "endframe"])
