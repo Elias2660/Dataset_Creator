@@ -1,47 +1,62 @@
 """
-Make_Dataset.py
+Module Name: Make_Dataset.py
 
 Description:
-    This script creates a comprehensive dataset CSV file ("dataset.csv") by combining frame count data from "counts.csv"
-    with log file data (logNo.txt, logPos.txt, logNeg.txt). It processes the frame counts by converting video filenames into
-    timestamps and then merges these with the log files that assign class labels. The final CSV aggregates each video's filename,
-    class label, beginning frame, and ending frame based on calculated frame intervals determined by the provided FPS,
-    starting frame, frame interval, and end frame buffer parameters.
+    Combines video frame counts and timestamped log files into a unified dataset CSV.
+    Reads a counts CSV (with 'filename' and 'framecount'), processes filenames into timestamps,
+    merges with any number of log files assigning class labels, computes begin and end frames
+    based on FPS, starting frame offset, class frame intervals, and end-frame buffer.
+    Outputs:
+        - dataset.csv: aggregated rows with filename, class, beginframe, endframe.
+        - RUN_DESCRIPTION.log: records mapping of log files to class numbers.
+    Finally, validates the produced dataset using dataset_checker.check_dataset.
 
 Usage:
-        python Make_Dataset.py [--path PATH] [--counts_file COUNTS_CSV] [--files LOG_FILES]
-                               [--fps FPS] [--starting-frame START_FRAME] [--frame-interval FRAME_INTERVAL]
-                               [--end-frame-buffer END_FRAME_BUFFER]
+    python Make_Dataset.py \
+        --in-path <input_dir> \
+        --out-path <output_dir> \
+        [--counts_file <counts_csv>] \
+        [--files <log1,log2,...>] \
+        [--fps <fps>] \
+        [--starting-frame <start_frame>] \
+        [--frame-interval <frame_interval>] \
+        [--end-frame-buffer <end_frame_buffer>]
 
 Arguments:
-    --path:
-        Directory path where the input files are located.
-        (Default: ".")
+    --in-path
+        Directory containing counts CSV, log files, and video files. (default: ".")
+    --out-path
+        Directory for reading inputs and writing outputs. (required)
+    --counts_file
+        CSV filename with 'filename' and 'framecount' columns. (default: "counts.csv")
+    --files
+        Comma-separated list of log filenames (e.g., "logNo.txt,logPos.txt,logNeg.txt"). (default: "logNo.txt,logPos.txt,logNeg.txt")
+    --fps
+        Frames per second for timestamp-to-frame conversion; auto-detected for .mp4, default 25. (default: 25)
+    --starting-frame
+        Base frame index to start counting from. (default: 1)
+    --frame-interval
+        Gap in frames to insert between class segments. (default: 0)
+    --end-frame-buffer
+        Buffer subtracted from the end frame of each video segment. (default: 0)
 
-    --counts_file:
-        Filename of the counts CSV file containing 'filename' and 'framecount' columns.
-        (Default: "counts.csv")
+Workflow:
+    1. Configure logging and parse command-line arguments.
+    2. Detect or set FPS based on first video file extension.
+    3. Load and preprocess counts CSV into timestamped entries (process_frame_count).
+    4. Load each log file, convert its frame_name to timestamps, assign incremental class labels (process_log_files).
+    5. Merge counts and log entries, sort by time, forward-fill filenames, and compute raw begin/end frames (create_dataset).
+    6. Apply starting-frame offset, end-frame buffer, and inter-class frame intervals (add_buffering).
+    7. Write out 'dataset.csv' and append class mappings to 'RUN_DESCRIPTION.log'.
+    8. Validate and clean the final dataset via dataset_checker.check_dataset.
 
-    --files:
-        Comma-separated list of log file names to process (e.g., "logNo.txt,logPos.txt,logNeg.txt").
-        (Default: "logNo.txt,logPos.txt,logNeg.txt")
-
-    --fps:
-        Frames per second used in the video. Defaults to 25 or is auto-detected based on the video file type.
-        (Default: 25)
-
-    --starting-frame:
-        Starting frame number used as the basis for computing frame intervals.
-        (Default: 1)
-
-    --frame-interval:
-        Number of frames to add as an interval between segments.
-        (Default: 0)
-
-    --end-frame-buffer:
-        The buffer value subtracted from the computed end frame for each dataset entry.
-        (Default: 0)
+Dependencies:
+    - pandas, numpy: for DataFrame handling and numeric operations.
+    - argparse, logging, os: for CLI, logging, and file operations.
+    - utils: utility to retrieve video FPS.
+    - dataset_checker: to perform final dataset validation and cleanup.
 """
+
 import argparse
 import logging
 import os

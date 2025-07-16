@@ -2,37 +2,37 @@
 Module Name: dataset_checker.py
 
 Description:
-    This module validates and cleans dataset CSV files by performing several checks on each row of the dataset.
-    The checks include:
-        - Ensuring that the end frame does not exceed the total video frames based on a separate counts CSV.
-        - Verifying that there are no missing (null) values in the dataset.
-        - Confirming that the begin frame is strictly less than the end frame.
-        - Ensuring that both begin and end frames are non-negative.
-
-    If any row fails these validations, detailed error messages are logged, and the problematic rows are removed.
-    Prior to updating the dataset, the module creates a backup of the original file with a ".bak" extension.
+    Scans a directory for dataset CSV files matching a given glob pattern and validates each file
+    against reference frame counts from a separate counts CSV. For each row in each dataset file, the following checks are performed:
+        - End frame does not exceed the total frame count for the corresponding video.
+        - No missing (null) values.
+        - Begin frame is strictly less than the end frame.
+        - Begin and end frames are non-negative.
+    Detailed error messages are logged at INFO level. Any rows that fail validation are dropped,
+    and the cleaned dataset overwrites the original file only after creating a backup with a “.bak” extension.
 
 Usage:
-    To run this script from the command line, provide the necessary arguments:
-        $ python dataset_checker.py --search-string "dataset_*.csv" --counts "counts.csv"
-    - The "--search-string" argument specifies the file pattern to identify the dataset files.
-    - The "--counts" argument defines the path to the counts CSV file that contains the reference frame counts.
+    $ python dataset_checker.py \
+        --in-path <input_directory> \
+        --search-string "<pattern>" \
+        --counts <counts_csv> \
+        [--out-path <output_directory>]
+
+    Arguments:
+        --in-path        Directory to search for dataset files and the counts CSV (default: current directory)
+        --search-string  Glob pattern to match dataset CSV files (default: "dataset_*.csv")
+        --counts         Filename of the counts CSV within the input directory (default: "counts.csv")
+        --out-path       Directory to save cleaned datasets and backups (currently the same as --in-path)
 
 Functions:
     check_dataset(path: str, counts: pd.DataFrame)
-        Reads the dataset from the provided path, performs the necessary validations against the counts DataFrame,
-        logs any errors found, and cleans the dataset by removing faulty rows. A backup is created before the cleaned
-        dataset overwrites the original.
+        Reads the dataset at `path`, validates rows against the `counts` DataFrame, logs any errors,
+        drops faulty rows, creates a backup (`path + ".bak"`), and writes the cleaned dataset back to `path`.
 
 Logging:
-    The module uses Python's logging module to log information about the validation process, including details on errors
-    encountered and actions performed (such as creating backups or saving the cleaned dataset).
-
-Notes:
-    - The file search is performed using a subprocess call to the "ls" command, which may be platform-dependent (i.e., works
-      primarily on Unix-like systems).
-    - ANSI escape sequences are stripped from the file search output using regex to ensure clean file names.
+    Uses Python’s built-in `logging` module configured at INFO level with timestamped messages.
 """
+
 import argparse
 import logging
 import re

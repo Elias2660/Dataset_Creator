@@ -1,58 +1,58 @@
 """
-one_class_runner.py
+Module Name: one_class_runner.py
 
-This script processes a counts csv file containing video information and generates dataset CSV files by partitioning
-each video's frame count into several splits. Each video is treated as a distinct class, and for each class,
-the script creates frame intervals and produces multiple dataset files with one frame interval per class per file.
-
-This is meant to run with testing scripts that create one video for each class.
+Description:
+    Generates partitioned dataset CSVs for a set of videos, treating each video as its own class.
+    Reads a counts CSV (with columns "filename" and "framecount"), applies an optional start-frame offset
+    and end-frame buffer, then divides each video's usable frames into a specified number of equal splits.
+    Outputs:
+        - A master "dataset.csv" listing every frame interval with its class label.
+        - Individual split files "dataset_0.csv", "dataset_1.csv", ..., each containing one randomly selected
+          interval per class, with no duplication across splits.
 
 Usage:
-    Run the script from the command line in the following format:
-        python one_class_runner.py [--path PATH] [--counts COUNTS_CSV]
-                                    [--start-frame START_FRAME] [--end-frame-buffer END_FRAME_BUFFER]
-                                    [--splits SPLITS]
+    python one_class_runner.py \
+        --in-path <input_directory> \
+        --out-path <output_directory> \
+        [--counts <counts_csv>] \
+        [--start-frame <start_frame>] \
+        [--end-frame-buffer <end_frame_buffer>] \
+        [--splits <num_splits>]
 
 Arguments:
-    --path:
-        Path to the directory containing the counts CSV file.
-        (Default: ".")
-
-    --counts:
-        Filename for the counts CSV file, expected to have columns including at least 'filename' and 'framecount'.
-        (Default: "counts.csv")
-
-    --start-frame:
-        The starting frame number to consider when splitting frames.
-        (Default: 0)
-
-    --end-frame-buffer:
-        Number of frames to reserve at the end, effectively reducing the total frames considered.
-        (Default: 0)
-
-    --splits:
-        Number of splits (or segments) per video. The script divides each video's usable frames into this many segments.
-        (Default: 3)
+    --in-path
+        Directory containing the counts CSV file. (default: ".")
+    --out-path
+        Directory where the master and split dataset CSVs will be written. (required)
+    --counts
+        Filename of the counts CSV, expected to include 'filename' and 'framecount' columns. (default: "counts.csv")
+    --start-frame
+        Frame index to start from when partitioning. (default: 0)
+    --end-frame-buffer
+        Number of frames to exclude at the end of each video’s count. (default: 0)
+    --splits
+        Number of equal segments (splits) into which each video’s usable frames will be divided. (default: 3)
 
 Workflow:
-    1. Initialize logging and parse command line arguments.
-    2. Read the counts CSV file located in the specified directory.
-    3. For each video file (treated as a unique class), compute frame intervals by subtracting buffers and dividing
-       by the number of splits.
-    4. Create a master dataset CSV file ("dataset.csv") that records all frame ranges, filenames, and associated class labels.
-    5. For each split:
-         - Randomly select one interval per class.
-         - Remove the chosen interval from the master dataset to avoid duplication.
-         - Write the selected intervals to a new CSV file (e.g., "dataset_0.csv", "dataset_1.csv", etc.).
-    6. Log key processing steps and output file creation progress.
+    1. Configure logging and parse command-line arguments.
+    2. Load the counts CSV from `<out-path>/<counts>`.
+    3. For each video (class), compute the usable frame span:
+           usable_frames = framecount - end_frame_buffer - start_frame
+           interval_size = usable_frames // splits
+    4. Build `dataset.csv` with one row per interval per class (columns: filename, class, beginframe, endframe).
+    5. For each split index i in [0, splits):
+         a. Randomly select one interval row per class from the master dataset.
+         b. Remove those rows from the master set to avoid reuse.
+         c. Write the selected intervals to `dataset_i.csv` (columns: file, class, begin frame, end frame).
+    6. Log each major step and confirm creation of each output file.
 
 Dependencies:
-    - pandas: For reading and manipulating CSV data.
-    - logging: For logging information throughout the processing.
-    - argparse: For handling command line argument parsing.
-    - os: For file path operations.
-    - random: For random selection of intervals during dataset file creation.
+    - pandas: CSV reading and DataFrame operations.
+    - logging: Workflow and error reporting.
+    - argparse: Command-line argument parsing.
+    - os, random: File path handling and random interval selection.
 """
+
 import argparse
 import logging
 import os
