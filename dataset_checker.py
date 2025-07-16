@@ -37,6 +37,7 @@ import argparse
 import logging
 import re
 import subprocess
+import os
 
 import pandas as pd
 
@@ -107,18 +108,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Check dataset files for missing values and other errors")
     parser.add_argument(
-        "--dataset-csv-path",
+        "--in-path",
         type=str,
         help="the path to find the input files for the directory",
         default="."
     )
     parser.add_argument(
-        "--counts-csv-path",
+        "--out-path",
         type=str,
-        help="The path the the counts.csv file",
+        help="the path to find the output files for the directory",
         default="."
     )
-
     parser.add_argument(
         "--search-string",
         type=str,
@@ -131,7 +131,7 @@ if __name__ == "__main__":
                         default="counts.csv")
 
     arguments = parser.parse_args()
-    command = f"ls {arguments.search_string}"
+    command = f"ls {os.path.join(arguments.in_path, arguments.search_string)}"
     output = subprocess.run(command,
                             shell=True,
                             capture_output=True,
@@ -143,4 +143,4 @@ if __name__ == "__main__":
     logging.info(f"found dataset files: {file_list}")
     counts = pd.read_csv(arguments.counts)
     for file in file_list:
-        check_dataset(file, counts)
+        check_dataset(os.path.join(arguments.in_path, file), counts)
