@@ -141,6 +141,6 @@ if __name__ == "__main__":
     file_list = sorted(
         [ansi_escape.sub("", line) for line in output.stdout.splitlines()])
     logging.info(f"found dataset files: {file_list}")
-    counts = pd.read_csv(arguments.counts)
+    counts = pd.read_csv(os.path.join(arguments.in_path, arguments.counts))
     for file in file_list:
         check_dataset(os.path.join(arguments.in_path, file), counts)
