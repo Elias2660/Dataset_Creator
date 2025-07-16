@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # it's weird, but regex is used to find the dataset files
     ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
     file_list = sorted(
-        [ansi_escape.sub("", line) for line in output.stdout.splitlines()])
+        [ansi_escape.sub("", line).split("/")[-1] for line in output.stdout.splitlines()])
     logging.info(f"found dataset files: {file_list}")
     counts = pd.read_csv(os.path.join(arguments.in_path, arguments.counts))
     for file in file_list:
