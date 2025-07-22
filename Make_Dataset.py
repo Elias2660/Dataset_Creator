@@ -344,11 +344,6 @@ if __name__ == "__main__":
     processed_counts = process_frame_count(counts)
     list_of_logs = []  # allow for any number of log files
     
-    if len(list_of_logs) == 0:
-        raise Exception("There are no log files specified. "
-                        "You might have forgotten to add them or may have accidentally deleted them. " 
-                        "If this was intentional (e.g. every video is one class) you might need to specify another option")
-        
     if len(list_of_logs) == 1:
         raise Warning("You have only one specified log file open. This might cause issues because most of the videos might be one class"
                       "If this was intentional (e.g. every video is one class) you might need to specify another option. "
@@ -376,6 +371,12 @@ if __name__ == "__main__":
         list_of_logs.append(processed_logfile)
 
         class_idx += 1
+        
+    if len(list_of_logs) == 0:
+        raise Exception("There are no log files specified. "
+                        "You might have forgotten to add them or may have accidentally deleted them. " 
+                        "If this was intentional (e.g. every video is one class) you might need to specify another option")
+        
 
     dset = create_dataset(
         counts,
