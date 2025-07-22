@@ -326,6 +326,11 @@ if __name__ == "__main__":
         file for file in dir_files
         if file.endswith(".mp4") or file.endswith(".h264")
     ]
+    
+    if (len(video_files) == 0):
+        raise Exception("This process found no video files. "
+                        "You might have specified the wrong path. "
+                        "Otherwise, there might be an issue in the Unified-bee-Runner pipeline")
 
     if video_files[0].endswith(".mp4"):
         fps = utils.get_video_info(video_files, args.in_path)
@@ -338,7 +343,18 @@ if __name__ == "__main__":
     counts = pd.read_csv(os.path.join(args.out_path, counts_file))
     processed_counts = process_frame_count(counts)
     list_of_logs = []  # allow for any number of log files
-
+    
+    if len(list_of_logs == 0):
+        raise Exception("There are no log files specified. "
+                        "You might have forgotten to add them or may have accidentally deleted them. " 
+                        "If this was intentional (e.g. every video is one class) you might need to specify another option")
+        
+    if len(list_of_logs == 1):
+        raise Warning("You have only one specified log file open. This might cause issues because most of the videos might be one class"
+                      "If this was intentional (e.g. every video is one class) you might need to specify another option. "
+                      "Otherwise, Ignore this warning. "
+                      )
+    
     class_idx = 0
 
     # add class-dataset class name relations to RUN_DESCRIPTION.log for clarity

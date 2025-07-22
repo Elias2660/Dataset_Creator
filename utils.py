@@ -6,6 +6,10 @@ import cv2
 def get_video_info(file_list, path):
     # get fps from all videos and compute the most common fps
     fps_list = []
+    
+    if len(file_list) == 0:
+        raise Exception("No video files passed into the get_video_info() command")
+    
     for video_file in file_list:
         video_path = os.path.join(path, video_file)
         video = cv2.VideoCapture(video_path)

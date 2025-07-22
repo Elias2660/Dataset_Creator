@@ -126,14 +126,18 @@ if __name__ == "__main__":
         f"the start frame for the function: {args.start_frame}\n"
         f"the buffer for the end frame: {args.end_frame_buffer}\n"
     )
-
+    
+    if args.counts not in os.listdir(args.out_path):
+        raise Exception(f"File with frame counts (as specified as the {args.counts} file) was not found in the specified directory. "
+                        "This might be a pathing problem, or the file might just not have been created."
+                        )
     counts = pd.read_csv(os.path.join(args.out_path, args.counts))
     number_of_videos = len(counts.index)
     videos_per_class = number_of_videos // args.splits
     logging.info(
         f"Read counts.csv, found {number_of_videos} videos, each class will have {videos_per_class} videos"
     )
-
+    
     final_dataframe = pd.DataFrame(
         columns=["filename", "class", "beginframe", "endframe"]
     )

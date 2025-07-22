@@ -124,7 +124,12 @@ if __name__ == "__main__":
                  f" end_frame_buffer={args.end_frame_buffer}, "
                  f" splits={args.splits}"
                  )
-
+    
+    if args.counts not in os.listdir(args.out_path):
+        raise Exception(f"File with frame counts (as specified as the {args.counts} file) was not found in the specified directory. "
+                        "This might be a pathing problem, or the file might just not have been created."
+                        )
+    
     counts = pd.read_csv(os.path.join(args.out_path, args.counts))
 
     final_dataframe = pd.DataFrame(
