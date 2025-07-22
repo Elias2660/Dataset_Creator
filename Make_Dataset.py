@@ -349,7 +349,7 @@ if __name__ == "__main__":
                         "You might have forgotten to add them or may have accidentally deleted them. " 
                         "If this was intentional (e.g. every video is one class) you might need to specify another option")
         
-    if len(list_of_logs == 1):
+    if len(list_of_logs) == 1:
         raise Warning("You have only one specified log file open. This might cause issues because most of the videos might be one class"
                       "If this was intentional (e.g. every video is one class) you might need to specify another option. "
                       "Otherwise, Ignore this warning. "
