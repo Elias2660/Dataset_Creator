@@ -60,7 +60,7 @@ Dependencies:
 import argparse
 import logging
 logging.basicConfig(
-    format="%(asctime)s: %(message)s (Dataset Creation)",
+    format="%(asctime)s: (Dataset Creation) %(message)s",
     level=logging.INFO,
     datefmt="%Y-%m-%d %H:%M:%S",
 )
