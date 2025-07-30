@@ -55,17 +55,18 @@ Dependencies:
 
 import argparse
 import logging
+logging.basicConfig(
+    format="%(asctime)s: %(message)s (Dataset Creation)",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
 import os
 import random
 
 import pandas as pd
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s: %(message)s",
-        level=logging.INFO,
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
 
     parser = argparse.ArgumentParser(
         description=

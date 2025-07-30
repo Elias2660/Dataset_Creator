@@ -59,6 +59,11 @@ Dependencies:
 
 import argparse
 import logging
+logging.basicConfig(
+    format="%(asctime)s: %(message)s (Dataset Creation)",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 import os
 
 import numpy as np
@@ -239,7 +244,7 @@ def add_buffering(dset: pd.DataFrame, starting_frame: int,
 if __name__ == "__main__":
 
     logging.basicConfig(
-        format="%(asctime)s: %(message)s",
+        format="%(asctime)s: %(message)s (Dataset Creation)",
         level=logging.INFO,
         datefmt="%Y-%m-%d %H:%M:%S",
     )

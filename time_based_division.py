@@ -60,16 +60,16 @@ Dependencies:
 
 import pandas as pd
 import logging
+logging.basicConfig(
+    format="%(asctime)s: %(message)s (Dataset Creation)",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 import argparse
 import os
 
 if __name__ == "__main__":
 
-    logging.basicConfig(
-        format="%(asctime)s: %(message)s",
-        level=logging.INFO,
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
     parser = argparse.ArgumentParser(
         description="Splitting up a counts.csv into a dataset.csv that has time based class divisions"
     )

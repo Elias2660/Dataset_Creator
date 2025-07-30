@@ -35,6 +35,11 @@ Logging:
 
 import argparse
 import logging
+logging.basicConfig(
+    format="%(asctime)s: %(message)s (Dataset Creation)",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 import re
 import subprocess
 import os
@@ -52,6 +57,7 @@ def check_dataset(path: str, counts: pd.DataFrame):
     dataset = pd.read_csv(path)
 
     faulty_rows = []
+    logging.info(f"IMPORTANT: Checking for errors in dataset at {path}. This could just happen sometimes, and doesn't mean your workflow has problems")
     for i in range(len(dataset)):
         if (int(dataset.iloc[i, 3]) > counts[dataset.iloc[
                 i, 0] == counts["filename"]]["framecount"].values[0]):
@@ -98,11 +104,6 @@ def check_dataset(path: str, counts: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s: %(message)s",
-        level=logging.INFO,
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
     logging.info("Finding Dataset files")
 
     parser = argparse.ArgumentParser(
